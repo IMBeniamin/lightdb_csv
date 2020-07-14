@@ -1,10 +1,14 @@
-#include "CORE_API.h"
-
+#include "core_api.h"
+#include "tools_api.h"
 int main() {
-    cellulare * main_table = load_data();  // Load file data in memory
-//    cellulare ** pp_main_table = linked_list_flist(main_table, get_file_rows(open_cell_file("r")));
-
-    free_main_table(main_table);  // Free loaded data
+    cellulare ** main_table = load_data_llist();  // Load file data in memory
+    export_to_HTML(main_table);
+    export_to_TXT(main_table);
+    getchar();
+    cell_quick_sort(main_table, sizeof(cellulare*), get_file_rows(open_file("cellulari.csv", "r")), "cpu");
+    export_to_HTML(main_table);
+    export_to_TXT(main_table);
+    free_main_table_p(main_table);  // Free loaded data
     return 0;
 }
 
@@ -13,7 +17,7 @@ int main() {
 /*
  * 1) Caricamento da file cellulari.csv in vettore di “struct cellulare”
  * 2) Ordinamenti (almeno 2 diversi)
- * TODO 3) Visualizzazione (su file cellulari.html / cellulari.txt)
+ * 3) Visualizzazione (su file cellulari.html / cellulari.txt)
  * TODO 4) Ricerca (per almeno due campi) e visualizzazione del cellulare cercato
  * TODO 5) Cancellazione (in memoria) di un cellulare
  * TODO 6) Inserimento (da tastiera nel vettore in memoria) di un nuovo cellulare

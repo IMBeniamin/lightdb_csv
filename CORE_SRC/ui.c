@@ -1,4 +1,4 @@
-#include "../CORE_API/UI.h"
+#include "../CORE_API/ui.h"
 
 /*
  * Manages and updates screen and handles user input/output
