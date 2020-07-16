@@ -91,3 +91,56 @@ void export_to_TXT(cellulare ** main_table) {
         write_str_to_file(_t_gen, analyt_txt);
     }
 }
+
+int valid_str(char * str) { // TODO going out of boundary for str
+    int c = 0;
+    for (;str; str++)
+        if (*str)
+            c++;
+    return c;
+}
+
+int comp_cell(const cellulare * b_cell, const void * c_ag) {
+    /*
+     * b_cell = base cellulare // parameter to compare against
+     * c_ag = comparation against // parameter to be compared
+     */
+    int checks = 0;
+    cellulare *c_cell = (cellulare *) c_ag;
+    if(c_cell->id && b_cell->id == c_cell->id)
+        checks++;
+    if (c_cell->weight && b_cell->weight == c_cell->weight)
+        checks++;;
+    if (c_cell->ram && b_cell->ram == c_cell->ram)
+        checks++;
+    if (c_cell->display_ppi && b_cell->display_ppi == c_cell->display_ppi)
+        checks++;
+    if (c_cell->id_os && b_cell->id_os == c_cell->id_os)
+        checks++;
+    if (c_cell->id_manufacturer && b_cell->id_manufacturer == c_cell->id_manufacturer)
+        checks++;
+    if (c_cell->display_size && b_cell->display_size == c_cell->display_size)
+        checks++;
+    if (valid_str(c_cell->display_resolution) && strcmp(c_cell->display_resolution, b_cell->display_resolution) == 0)
+        checks++;
+    if (valid_str(c_cell->size) && strcmp(c_cell->size, b_cell->size) == 0)
+        checks++;
+    if (valid_str(c_cell->cpu) && strcmp(c_cell->cpu, b_cell->cpu) == 0)
+        checks++;
+    if (valid_str(c_cell->name) && strcmp(c_cell->name, b_cell->name) == 0)
+        checks++;
+    if (valid_str(c_cell->notes) && strcmp(c_cell->notes, b_cell->notes) == 0)
+        checks++;
+    return checks;
+}
+
+// TODO redo search with auto completition
+int search_in_main_table(const cellulare **main_table, const cellulare *search_p) {
+    int len = main_table_len(main_table);
+    for (int i = 0; i < len; i++) {
+        if (comp_cell(main_table[i], search_p)) {
+            return i;
+        }
+    }
+    return -1;
+}

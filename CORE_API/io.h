@@ -19,3 +19,7 @@ void read_cellulare(FILE *r_d, cellulare * w_d);
 
 int write_str_to_file(const char * r_d, FILE * w_d);
 FILE * open_file(const char * file_name, const char * mode);
+
+int main_table_len(const cellulare ** main_table);
+
+void delete_cellulare(cellulare ** main_table, int del_i);

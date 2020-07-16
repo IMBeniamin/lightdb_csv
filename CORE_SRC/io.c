@@ -110,9 +110,31 @@ void free_main_table(cellulare * main_table) {
 
 void free_main_table_p(cellulare **main_table) {
     // !! ONLY call this IF EACH struct was malloc'ed INDIVIDUALLY
-    size_t rows = get_file_rows(open_cell_file("r"));
+    //size_t rows = get_file_rows(open_cell_file("r")); legacy data counting function
     for (;*main_table; main_table++) {
         free(*main_table);
     }
     free(main_table);
+}
+
+int main_table_len(const cellulare ** main_table) {
+    int i = 0;
+    while(*main_table) {
+        i++;
+        main_table++;
+    }
+    return i;
+}
+
+void delete_cellulare(cellulare ** main_table, int del_i) {
+    int m_t_len = main_table_len(main_table);
+    free(main_table[del_i]);
+
+    for (; del_i < m_t_len; del_i++){
+        main_table[del_i] = main_table[del_i+1];
+        if (main_table[del_i])
+            main_table[del_i]->id--;
+    }
+    // TODO consider doing a realloc to reduce main_table's size after deletion
+    //main_table = realloc(main_table, del_i* sizeof(cellulare*));
 }
