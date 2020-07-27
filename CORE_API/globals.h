@@ -1,4 +1,11 @@
 #pragma once
+
+/*
+ * Global naming conventions:
+ * w_d = write_data (data to be written [might be used with an appended (f) which means that the data is formatted]
+ * r_d = read_data (data to be read) (usually is passed to a w_d)
+ */
+
 typedef struct telefono_cellulare {
     int id;
     int weight;

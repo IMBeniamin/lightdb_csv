@@ -14,7 +14,7 @@
  */
 
 FILE * open_file(const char * file_name, const char * mode) {
-    if (strcmp(mode, "r") == 0 || strcmp(mode, "w") == 0) {
+    if (strcmp(mode, "r") == 0 || strcmp(mode, "w") == 0 || strcmp(mode, "a") == 0) {
         FILE * _opened = fopen(file_name, mode);
         if (_opened)
             return _opened;
@@ -25,7 +25,7 @@ FILE * open_file(const char * file_name, const char * mode) {
         return NULL;
 }
 
-int write_str_to_file(const char * r_d, FILE * w_d) {
+unsigned int write_str_to_file(const char * r_d, FILE * w_d) {
     return fwrite(r_d, 1, strlen(r_d), w_d);
 }
 
@@ -49,7 +49,7 @@ void read_cellulare(FILE *r_d, cellulare * w_d) {
     strcpy(w_d->display_resolution, token);
 }
 
-int get_file_rows(FILE * r_d) {
+size_t get_file_rows(FILE * r_d) {
     char buff[200];
     int res = 0;
     while (fgets(buff, 200, r_d)) {
@@ -58,7 +58,8 @@ int get_file_rows(FILE * r_d) {
     return res;
 }
 
-void read_to_list(cellulare * destination, size_t rows, FILE * r_d) {
+void read_to_list(cellulare * destination, FILE * r_d) {
+    size_t rows = get_file_rows(r_d);
     for (; rows; rows--, destination++) {
         read_cellulare(r_d, destination);
     }
@@ -75,22 +76,32 @@ FILE * open_cell_file(char * mode) {
 }
 
 cellulare * load_data_list() {
-    size_t rows = get_file_rows(open_cell_file("r"));
+    FILE * cell_file = open_cell_file("r");
+    size_t rows = get_file_rows(cell_file);
+    fclose(cell_file);
+
     cellulare * main_table = calloc(rows, sizeof(cellulare));
-    read_to_list(main_table, rows, open_cell_file("r"));
+
+    cell_file = open_cell_file("r");
+    read_to_list(main_table, cell_file);
+    fclose(cell_file);
+
     return main_table;
 
 }
 
 cellulare ** load_data_llist() {
     // Generates a linked list containing data read from the csv flie
-    size_t rows = get_file_rows(open_cell_file("r"));
+    FILE * cell_file = open_cell_file("r");
+    size_t rows = get_file_rows(cell_file);
+    fclose(cell_file);
     cellulare ** main_table = calloc(rows + 1, sizeof(cellulare*));
     for (int i = 0; i < rows; i++) {
         main_table[i] = calloc(1, sizeof(cellulare)); // allocate each struct
     }
     main_table[rows] = NULL;
-    read_to_llist(main_table, open_cell_file("r"));
+    cell_file = open_cell_file("r");
+    read_to_llist(main_table, cell_file);
     return main_table;
 }
 
@@ -117,7 +128,7 @@ void free_main_table_p(cellulare **main_table) {
     free(main_table);
 }
 
-int main_table_len(const cellulare ** main_table) {
+size_t main_table_len(const cellulare ** main_table) {
     int i = 0;
     while(*main_table) {
         i++;
@@ -126,15 +137,46 @@ int main_table_len(const cellulare ** main_table) {
     return i;
 }
 
-void delete_cellulare(cellulare ** main_table, int del_i) {
-    int m_t_len = main_table_len(main_table);
-    free(main_table[del_i]);
-
-    for (; del_i < m_t_len; del_i++){
-        main_table[del_i] = main_table[del_i+1];
-        if (main_table[del_i])
-            main_table[del_i]->id--;
-    }
-    // TODO consider doing a realloc to reduce main_table's size after deletion
-    //main_table = realloc(main_table, del_i* sizeof(cellulare*));
+int check_modified(cellulare ** main_table) {
+    FILE * csv_table = open_cell_file("r");
+    size_t file_table_size = get_file_rows(csv_table);
+    size_t main_table_size = main_table_len(main_table);
+    /*
+     * if len is not enough do 1 on 1 comparison
+     * cellulare * file_table = calloc(file_table_size, sizeof(cellulare));
+     * read_to_list(file_table, csv_table);
+     */
+    if (main_table_size != file_table_size)
+        return 1;
+    return 0;
 }
+
+unsigned int write_cell_to_file(cellulare * r_d, FILE * w_d) {
+    char w_d_f[700] = {0};
+    sprintf(w_d_f, "%d,%s,%d,%s,%d,%f,%s\n", r_d->id, r_d->name, r_d->ram, r_d->cpu, r_d->display_ppi, r_d->display_size, r_d->display_resolution); // TODO add rest of parameters
+    return write_str_to_file(w_d_f, w_d);
+}
+
+unsigned int write_table_to_file(cellulare ** main_table) {
+    /*
+     * Returns the bytes written to the file
+     */
+    size_t elem_written = 0;
+    size_t tot_written = 0;
+    if (check_modified(main_table)) {
+        FILE * w_d = open_cell_file("w");
+        while (*main_table) {
+            elem_written = write_cell_to_file(*main_table, w_d);
+            tot_written += elem_written;
+            if (elem_written)
+                main_table++;
+            else {
+                fprintf(stderr, "Error writing to the file!");
+                w_d = open_cell_file("a");
+            }
+        }
+        fclose(w_d);
+    }
+    return tot_written;
+}
+

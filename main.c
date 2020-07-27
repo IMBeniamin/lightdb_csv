@@ -1,10 +1,19 @@
 #include "core_api.h"
 #include "tools_api.h"
+#include <string.h>
 int main() {
     cellulare ** main_table = load_data_llist();  // Load file data in memory
+    cellulare *mycell = calloc(1, sizeof(cellulare));
+    strcpy(mycell->name, "test device");
+    strcpy(mycell->cpu, "super duper cpu");
+    strcpy(mycell->display_resolution, "1234x1234");
+    mycell->ram = 1234;
+    mycell->display_size = 1.1;
+    mycell->display_ppi = 123;
 
+    add_cellulare(main_table, mycell);
+    printf("%d", write_table_to_file(main_table));
     //delete_cellulare(main_table, 0); WORKING
-
     // __SEARCH__
     //cellulare search_par;
     //search_par.ram = 6000;
@@ -28,8 +37,8 @@ int main() {
  * 2) Ordinamenti (almeno 2 diversi)
  * 3) Visualizzazione (su file cellulari.html / cellulari.txt)
  * TODO 4) Ricerca (per almeno due campi) e visualizzazione del cellulare cercato
- * 5) Cancellazione (in memoria) di un cellulare
- * TODO 6) Inserimento (da tastiera nel vettore in memoria) di un nuovo cellulare
- * TODO 7) Salvataggio (su file cellulari.csv) del vettore in memoria (Se modificato).
+ * TODO [only UI] 5) Cancellazione (in memoria) di un cellulare
+ * TODO [only UI] 6) Inserimento (da tastiera nel vettore in memoria) di un nuovo cellulare
+ * 7) Salvataggio (su file cellulari.csv) del vettore in memoria (Se modificato).
  * TODO 8) Facoltativo: immettere un campo “immagine” nella struct cellulare e fare in modo che dal file cellulari.html si “veda” l'immagine del cellulare
  */
