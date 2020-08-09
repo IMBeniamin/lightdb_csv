@@ -1,8 +1,6 @@
 #include "../TOOLS_API/sorting.h"
 #include <string.h>
 
-typedef int (*comparator_func)(const void *, const void *);
-
 int id_compare(const void* a, const void* b) {
     // a = puntatore a puntatore di struct
     // cast a puntatore di cellulare sul valore del puntatore al puntatore
@@ -13,7 +11,6 @@ int id_compare(const void* a, const void* b) {
     if (arg1->id < arg2->id) return 1;
     return 0;
 }
-
 
 int weight_compare(const void* a, const void* b) {
     const cellulare * arg1 = (const cellulare *) *(const cellulare**) a;
@@ -93,29 +90,26 @@ int notes_compare(const void* a, const void* b) {
     return strcmp(arg1->notes, arg2->notes);
 }
 
+// Doesn't need a prototype
 comparator_func get_comp_func(char * member) {
-    if (strcmp(member, "id") == 0) return &id_compare;
-    else if (strcmp(member, "weight") == 0) return &weight_compare;
-    else if (strcmp(member, "ram") == 0) return &ram_compare;
-    else if (strcmp(member, "display_ppi") == 0) return &d_ppi_compare;
-    else if (strcmp(member, "id_os") == 0) return &id_os_compare;
-    else if (strcmp(member, "id_manufacturer") == 0) return &id_man_compare;
-    else if (strcmp(member, "display_size") == 0) return &disp_size_compare;
-    else if (strcmp(member, "display_resolution") == 0) return &disp_res_compare;
-    else if (strcmp(member, "size") == 0) return &size_compare;
-    else if (strcmp(member, "cpu") == 0) return &cpu_compare;
-    else if (strcmp(member, "name") == 0) return &name_compare;
-    else if (strcmp(member, "notes") == 0) return &notes_compare;
-    else return NULL;
+    for (size_t i = 0; fields[i].execute; i++) {
+        if(!strcmp(member, fields[i].name))
+            return fields[i].execute;
+    }
+    return NULL;
 }
 
 int cell_quick_sort(cellulare **main_table, size_t element_size, size_t nitems, char *member) {
-    // TODO add reversed param
+    // TODO add reversed param && testing
 
     /// returns 0 if failed
     comparator_func c_f = get_comp_func(member);
     if (c_f) {
         qsort(main_table, nitems, element_size, c_f);
+        size_t table_len = main_table_len(main_table);
+        for (int i=0; i<table_len; i++) {
+            main_table[i]->id = i+1;
+        }
         return 1;
     }
     else

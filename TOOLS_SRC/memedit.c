@@ -7,8 +7,9 @@ void add_cellulare(cellulare ** main_table, cellulare * r_d) {
      * The r_d cellulare's id is automatically calculated based on preexisting data
      */
     //TODO validate r_d
-    int last_id = main_table_len(main_table);
+    //int last_id = main_table_len(main_table);
     unsigned int new_table_len = main_table_len(main_table) + 1;
+    unsigned int last_id = new_table_len - 1;
     r_d->id = last_id + 1;
     realloc(main_table, new_table_len*sizeof(cellulare*));
     main_table[new_table_len-1] = calloc(1, sizeof(cellulare));

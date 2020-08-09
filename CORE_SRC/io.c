@@ -52,9 +52,8 @@ void read_cellulare(FILE *r_d, cellulare * w_d) {
 size_t get_file_rows(FILE * r_d) {
     char buff[200];
     int res = 0;
-    while (fgets(buff, 200, r_d)) {
+    while (fgets(buff, 200, r_d))
        res++;
-    }
     return res;
 }
 
@@ -90,8 +89,8 @@ cellulare * load_data_list() {
 
 }
 
-cellulare ** load_data_llist() {
-    // Generates a linked list containing data read from the csv flie
+cellulare ** load_data_plist() {
+    // Generates a pointer list containing data read from the csv flie
     FILE * cell_file = open_cell_file("r");
     size_t rows = get_file_rows(cell_file);
     fclose(cell_file);
@@ -105,14 +104,14 @@ cellulare ** load_data_llist() {
     return main_table;
 }
 
-cellulare ** linked_list_flist(cellulare * list, size_t lsize) {
-    // create linked list from normal array
+cellulare ** pointer_list_flist(cellulare * list, size_t lsize) {
+    // create pointer list from normal array
     // used to perform various tests and check efficiency of both methods
-    cellulare ** linked_list = calloc(lsize, sizeof(cellulare*));
+    cellulare ** pointer_list = calloc(lsize, sizeof(cellulare*));
     for (int i=0; i<lsize; i++) {
-        linked_list[i] = &list[i];
+        pointer_list[i] = &list[i];
     }
-    return linked_list;
+    return pointer_list;
 }
 
 void free_main_table(cellulare * main_table) {
@@ -128,7 +127,7 @@ void free_main_table_p(cellulare **main_table) {
     free(main_table);
 }
 
-size_t main_table_len(const cellulare ** main_table) {
+size_t main_table_len(cellulare ** main_table) {
     int i = 0;
     while(*main_table) {
         i++;
@@ -180,3 +179,7 @@ unsigned int write_table_to_file(cellulare ** main_table) {
     return tot_written;
 }
 
+void safe_quit(cellulare ** main_table) {
+    write_table_to_file(main_table);
+    exit(0);
+}

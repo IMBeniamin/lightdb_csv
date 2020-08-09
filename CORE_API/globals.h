@@ -5,6 +5,7 @@
  * w_d = write_data (data to be written [might be used with an appended (f) which means that the data is formatted]
  * r_d = read_data (data to be read) (usually is passed to a w_d)
  */
+#define CELLULARE_STRING_LINE_SIZE 200
 
 typedef struct telefono_cellulare {
     int id;
@@ -20,3 +21,7 @@ typedef struct telefono_cellulare {
     char name[40];
     char notes[500];
 }cellulare;
+
+typedef struct String {
+    char data[100];
+}string;

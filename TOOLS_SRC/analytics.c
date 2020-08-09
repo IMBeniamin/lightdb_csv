@@ -1,5 +1,6 @@
 #include "../TOOLS_API/analytics.h"
 #include <string.h>
+#include <stdlib.h>
 
 /*
  * This section adresses data output in various formats.
@@ -75,21 +76,33 @@ int export_to_HTML(cellulare ** main_table) {
     return 0; // ret 0 if everything went well
 }
 
+void generate_string (cellulare ** main_table, char * w_d) {
+    strcpy(w_d, "| ID | NAME               | RAM | PROCESSOR           | DISPALY_PPI | DISPLAY_SIZE | DISPLAY_RESOLUTION |\n");
+    //TODO consider adding all struct members
+    for (; *main_table; main_table++) {
+        char _generated_line[CELLULARE_STRING_LINE_SIZE] = {0};
+        sprintf(_generated_line, "|%4d|%20s|%5d|%21s|%13d|%14f|%20s|\n",
+                (*main_table)->id,
+                (*main_table)->name,
+                (*main_table)->ram,
+                (*main_table)->cpu,
+                (*main_table)->display_ppi,
+                (*main_table)->display_size,
+                (*main_table)->display_resolution);
+        strcat(w_d, _generated_line);
+    }
+}
+
 void export_to_TXT(cellulare ** main_table) {
     FILE * analyt_txt = open_file("TXT_output.txt", "w");
-    write_str_to_file("| ID | NAME               | RAM | PROCESSOR           | DISPALY_PPI | DISPLAY_SIZE | DISPLAY_RESOLUTION |\n", analyt_txt);
-    char _t_gen[200];
-    for (; *main_table; main_table++) {
-        sprintf(_t_gen, "|%4d|%20s|%5d|%21s|%13d|%14f|%20s|\n",
-                                                (*main_table)->id,
-                                                (*main_table)->name,
-                                                (*main_table)->ram,
-                                                (*main_table)->cpu,
-                                                (*main_table)->display_ppi,
-                                                (*main_table)->display_size,
-                                                (*main_table)->display_resolution);
-        write_str_to_file(_t_gen, analyt_txt);
-    }
+    char * formatted_data = calloc(main_table_len(main_table)*CELLULARE_STRING_LINE_SIZE+1, sizeof(char));
+    if (!formatted_data) return;
+
+    generate_string(main_table, formatted_data);
+    write_str_to_file(formatted_data, analyt_txt);
+
+    free(formatted_data);
+    fclose(analyt_txt);
 }
 
 int valid_str(char * str) { // TODO going out of boundary for str
@@ -135,12 +148,14 @@ int comp_cell(const cellulare * b_cell, const void * c_ag) {
 }
 
 // TODO redo search with auto completition
-int search_in_main_table(const cellulare **main_table, const cellulare *search_p) {
+int search_in_main_table(const cellulare **main_table, cellulare *search_p) {
     int len = main_table_len(main_table);
     for (int i = 0; i < len; i++) {
         if (comp_cell(main_table[i], search_p)) {
+            free(search_p);
             return i;
         }
     }
+    free(search_p);
     return -1;
 }
