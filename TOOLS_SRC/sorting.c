@@ -1,6 +1,22 @@
 #include "../TOOLS_API/sorting.h"
 #include <string.h>
 
+const struct field fields[] = {
+        {"id", &id_compare, "ID of the product"},
+        {"weight", &weight_compare, "Weight of the product"},
+        {"ram", &ram_compare, "Ram of the product"},
+        {"display_ppi", &d_ppi_compare, "Pixel per Inch capabilities of the display"},
+        {"id_os", &id_os_compare, "Operatig system's ID"},
+        {"id_manufacturer", &id_man_compare, "Manufacturer's ID"},
+        {"display_size", &disp_size_compare, "Size of the display in inches"},
+        {"display_resolution", &disp_res_compare, "Resolution of the display [AAAAxAAAA]"},
+        {"size", &size_compare, "Size of the device"}, // TODO nani??
+        {"cpu", &cpu_compare, "CPU's model"},
+        {"name", &name_compare, "Name of the device"},
+        {"notes", &notes_compare, "Aditional information about the device"},
+        {"", 0, ""} // END OF TABLE INDICATOR, MUST BE LAST
+};
+
 int id_compare(const void* a, const void* b) {
     // a = puntatore a puntatore di struct
     // cast a puntatore di cellulare sul valore del puntatore al puntatore

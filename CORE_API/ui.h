@@ -14,6 +14,7 @@ void test_commands(cellulare ** main_table);
 // Command wrappers
 // All wrappers/executables should have the prefix "cmd_" at the beginning of the name
 
-void cmd_help();
 void cmd_display_table(cellulare ** main_table);
-
+void cmd_list_fields(cellulare ** main_table);
+void cmd_sort(cellulare **main_table);
+void cmd_help();

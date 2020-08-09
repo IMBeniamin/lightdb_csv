@@ -113,7 +113,7 @@ int valid_str(char * str) { // TODO going out of boundary for str
     return c;
 }
 
-int comp_cell(const cellulare * b_cell, const void * c_ag) {
+int comp_cell(cellulare * b_cell, const void * c_ag) {
     /*
      * b_cell = base cellulare // parameter to compare against
      * c_ag = comparation against // parameter to be compared
@@ -148,7 +148,7 @@ int comp_cell(const cellulare * b_cell, const void * c_ag) {
 }
 
 // TODO redo search with auto completition
-int search_in_main_table(const cellulare **main_table, cellulare *search_p) {
+int search_in_main_table(cellulare **main_table, cellulare *search_p) {
     int len = main_table_len(main_table);
     for (int i = 0; i < len; i++) {
         if (comp_cell(main_table[i], search_p)) {

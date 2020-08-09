@@ -19,7 +19,8 @@ struct commandStruct {
 const struct commandStruct commands[] = {
         {"display", &cmd_display_table, "Prints the main_table onto the screen."},
         {"sort", &cmd_sort, "Enters the sorting menu."},
-        {"quit", &safe_quit, "Safely exit the application."},
+        {"quit", &safe_quit, "Safely exit the application. [saves changes]"},
+        {"exit", &safe_quit, "Alias for 'quit'"},
         {"help", &cmd_help, "Shows this menu."},
         {"",0,""} //End of table indicator. MUST BE LAST!!!
 };
@@ -30,6 +31,7 @@ const struct commandStruct commands[] = {
 
 _Noreturn void ui_loader(cellulare ** main_table) {
     // Boot up the CLI
+    setbuf(stdout, 0); // sets stdout buffer to 0 allowing it to also work in debug mode
     while (1)
         get_user_command(main_table, ">");
 }
@@ -49,9 +51,28 @@ void cmd_display_table(cellulare ** main_table) {
     printf("%s", str_data);
 }
 
+void cmd_list_fields(cellulare ** main_table) {
+    for (size_t i = 0; fields[i].execute; i++)
+        printf("%s --> %s\n", fields[i].name, fields[i].description);
+}
+
 void cmd_sort(cellulare ** main_table) {
+    printf("Would you like to view all fields available? [y/n]");
+    char buff[200];
+    while (fgets(buff, 200, stdin)) {
+        if (!strcmp(buff, "y\n")) {
+            cmd_list_fields(main_table);
+            break;
+        }
+        else if (!strcmp(buff, "n\n"))
+            break;
+        else
+            continue;
+    }
+
     size_t m_t_len = main_table_len(main_table);
-    char *field = get_user_str("Sort by [field] -->");
+    //todo add option to show available fields
+    char *field = get_user_str("\nSort by [field] -->");
     if (!cell_quick_sort(main_table, sizeof(cellulare *), m_t_len, field)) {
         printf("The field you provided does not exist! No changes were made.\n");
         return;
