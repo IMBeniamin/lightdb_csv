@@ -16,7 +16,6 @@ int id_os_compare(const void* a, const void* b);
 int id_man_compare(const void* a, const void* b);
 int disp_size_compare(const void* a, const void* b);
 int disp_res_compare(const void* a, const void* b);
-int size_compare(const void* a, const void* b);
 int cpu_compare(const void* a, const void* b);
 int name_compare(const void* a, const void* b);
 int notes_compare(const void* a, const void* b);

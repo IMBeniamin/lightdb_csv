@@ -6,20 +6,24 @@
  * r_d = read_data (data to be read) (usually is passed to a w_d)
  */
 #define CELLULARE_STRING_LINE_SIZE 200
+#define MAX_DISPLAY_RESOLUTION 15
+#define MAX_CPU 20
+#define MAX_NAME 40
+#define MAX_NOTES 500
 
 typedef struct telefono_cellulare {
-    int id;
-    int weight;
-    int ram;
-    int display_ppi;
-    int id_os;
-    int id_manufacturer;
+    unsigned int id;
+    unsigned int weight;
+    unsigned int ram;
+    unsigned int display_ppi;
+    unsigned int id_os;
+    unsigned int id_manufacturer;
     double display_size;
-    char display_resolution[10];
-    char size[15];
-    char cpu[20];
-    char name[40];
-    char notes[500];
+    char display_resolution[MAX_DISPLAY_RESOLUTION];
+//    char size[15];
+    char cpu[MAX_CPU];
+    char name[MAX_NAME];
+    char notes[MAX_NOTES];
 }cellulare;
 
 typedef struct String {

@@ -31,7 +31,7 @@ int prep_ante(FILE * analyt_html) {
                            "            <th>DISPLAY_SIZE</th>\n"
                            "            <th>DISPLAY_RESOLUTION</th>\n"
                            "        </tr>\n";
-    int res = write_str_to_file(prep_ante_app, analyt_html);
+    size_t res = write_str_to_file(prep_ante_app, analyt_html);
 
     if (res == strlen(prep_ante_app)) return 0;
     else return 1;
@@ -62,18 +62,10 @@ void prep_cont(cellulare ** main_table, FILE * analyt_html) {
 int prep_post(FILE * analyt_html) {
     char * prep_post_app = "    </table>\n"
                            "</body>\n";
-    int res = write_str_to_file(prep_post_app, analyt_html);
+    size_t res = write_str_to_file(prep_post_app, analyt_html);
 
     if (res == strlen(prep_post_app)) return 0;
     else return 1;
-}
-
-int export_to_HTML(cellulare ** main_table) {
-    FILE * analyt_html = open_file("HTMl_output.html", "w");
-    if (prep_ante(analyt_html)) return 1;
-    prep_cont(main_table, analyt_html);
-    if (prep_post(analyt_html)) return 1;
-    return 0; // ret 0 if everything went well
 }
 
 void generate_string (cellulare ** main_table, char * w_d) {
@@ -93,16 +85,27 @@ void generate_string (cellulare ** main_table, char * w_d) {
     }
 }
 
-void export_to_TXT(cellulare ** main_table) {
+int export_to_HTML(cellulare ** main_table) {
+    FILE * analyt_html = open_file("HTMl_output.html", "w");
+    if (prep_ante(analyt_html)) return 1;
+    prep_cont(main_table, analyt_html);
+    if (prep_post(analyt_html)) return 1;
+    fclose(analyt_html);
+    return 0; // ret 0 if everything went well
+}
+
+int export_to_TXT(cellulare ** main_table) {
     FILE * analyt_txt = open_file("TXT_output.txt", "w");
+    if (!analyt_txt) return 1;
     char * formatted_data = calloc(main_table_len(main_table)*CELLULARE_STRING_LINE_SIZE+1, sizeof(char));
-    if (!formatted_data) return;
+    if (!formatted_data) return 1;
 
     generate_string(main_table, formatted_data);
     write_str_to_file(formatted_data, analyt_txt);
 
     free(formatted_data);
     fclose(analyt_txt);
+    return 0;
 }
 
 int valid_str(char * str) { // TODO going out of boundary for str
@@ -123,7 +126,7 @@ int comp_cell(cellulare * b_cell, const void * c_ag) {
     if(c_cell->id && b_cell->id == c_cell->id)
         checks++;
     if (c_cell->weight && b_cell->weight == c_cell->weight)
-        checks++;;
+        checks++;
     if (c_cell->ram && b_cell->ram == c_cell->ram)
         checks++;
     if (c_cell->display_ppi && b_cell->display_ppi == c_cell->display_ppi)
@@ -135,8 +138,6 @@ int comp_cell(cellulare * b_cell, const void * c_ag) {
     if (c_cell->display_size && b_cell->display_size == c_cell->display_size)
         checks++;
     if (valid_str(c_cell->display_resolution) && strcmp(c_cell->display_resolution, b_cell->display_resolution) == 0)
-        checks++;
-    if (valid_str(c_cell->size) && strcmp(c_cell->size, b_cell->size) == 0)
         checks++;
     if (valid_str(c_cell->cpu) && strcmp(c_cell->cpu, b_cell->cpu) == 0)
         checks++;

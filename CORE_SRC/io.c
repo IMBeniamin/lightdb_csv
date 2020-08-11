@@ -30,20 +30,20 @@ unsigned int write_str_to_file(const char * r_d, FILE * w_d) {
 }
 
 void read_cellulare(FILE *r_d, cellulare * w_d) {
-    char buff[200];
-    fgets(buff, 200, r_d);
+    char buff[CELLULARE_STRING_LINE_SIZE];
+    fgets(buff, CELLULARE_STRING_LINE_SIZE, r_d);
     char * token = strtok(buff, ",");
-    w_d->id = token ? atoi(token) : 0;
+    w_d->id = token ? strtol(token, NULL, 10) : 0;
     token = strtok(NULL, ",");
     strcpy(w_d->name, token);
     token = strtok(NULL, ",");
-    w_d->ram = token ? atoi(token) : 0;
+    w_d->ram = token ? strtol(token, NULL, 10) : 0;
     token = strtok(NULL, ",");
     strcpy(w_d->cpu, token);
     token = strtok(NULL, ",");
-    w_d->display_ppi = token ? atoi(token) : 0;
+    w_d->display_ppi = token ? strtol(token, NULL, 10) : 0;
     token = strtok(NULL, ",");
-    w_d->display_size = token ? atoi(token) : 0;
+    w_d->display_size = token ? strtol(token, NULL, 10) : 0;
     token = strtok(NULL, ",");
     token[strlen(token) - 1] = 0;
     strcpy(w_d->display_resolution, token);
@@ -160,7 +160,7 @@ unsigned int write_table_to_file(cellulare ** main_table) {
     /*
      * Returns the bytes written to the file
      */
-    size_t elem_written = 0;
+    size_t elem_written;
     size_t tot_written = 0;
     if (check_modified(main_table)) {
         FILE * w_d = open_cell_file("w");

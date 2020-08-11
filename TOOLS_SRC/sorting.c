@@ -10,7 +10,6 @@ const struct field fields[] = {
         {"id_manufacturer", &id_man_compare, "Manufacturer's ID"},
         {"display_size", &disp_size_compare, "Size of the display in inches"},
         {"display_resolution", &disp_res_compare, "Resolution of the display [AAAAxAAAA]"},
-        {"size", &size_compare, "Size of the device"}, // TODO nani??
         {"cpu", &cpu_compare, "CPU's model"},
         {"name", &name_compare, "Name of the device"},
         {"notes", &notes_compare, "Aditional information about the device"},
@@ -80,12 +79,6 @@ int disp_res_compare(const void* a, const void* b) {
     const cellulare * arg1 = (const cellulare *) *(const cellulare**) a;
     const cellulare * arg2 = (const cellulare *) *(const cellulare**) b;
     return strcmp(arg1->display_resolution, arg2->display_resolution);
-}
-
-int size_compare(const void* a, const void* b) {
-    const cellulare * arg1 = (const cellulare *) *(const cellulare**) a;
-    const cellulare * arg2 = (const cellulare *) *(const cellulare**) b;
-    return strcmp(arg1->size, arg2->size);
 }
 
 int cpu_compare(const void* a, const void* b) {

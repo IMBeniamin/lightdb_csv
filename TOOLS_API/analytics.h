@@ -7,7 +7,7 @@ int prep_post(FILE * analyt_html);
 void generate_string (cellulare ** main_table, char * w_d);
 
 int export_to_HTML(cellulare ** main_table);
-void export_to_TXT(cellulare ** main_table);
+int export_to_TXT(cellulare ** main_table);
 
 int comp_cell(cellulare * b_cell, const void * c_ag);
 int search_in_main_table(cellulare **main_table, cellulare *search_p);

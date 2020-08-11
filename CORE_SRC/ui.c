@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-#define HELP_LINE "The data you have inserted is not valid! Please use the command 'help' if you need assistance\n"
 typedef void(*functionPointerType)(cellulare **);
 
 struct commandStruct {
@@ -19,6 +18,12 @@ const struct commandStruct commands[] = {
         {"list", &cmd_display_table, "ignore"},
 
         {"sort", &cmd_sort, "Enters the sorting menu."},
+
+        {"html", &cmd_html, "Creates the file HTMl_output.html which contains the main table formatted in HTML"},
+
+        {"txt", &cmd_txt, "Creates the file TXT_output.txt which contains the main table formatted in txt"},
+
+        {"add", &cmd_add, "Asks the user all the data needed to generate a new cellualre and adds it to the main table"},
 
         {"quit", &cmd_safe_quit, "Safely exit the application. [saves changes]. Aliases: [exit, q]"},
         {"exit", &cmd_safe_quit, "ignore"},
@@ -41,7 +46,7 @@ const struct commandStruct commands[] = {
 
 _Noreturn void ui_loader(cellulare ** main_table) {
     // Boot up the CLI
-    setbuf(stdout, 0); // sets stdout buffer to 0 allowing it to also work in debug mode
+    setbuf(stdout, 0); // sets stdout's buffer to NULL allowing it to work during debug
     while (1)
         get_user_command(main_table, ">");
 }
@@ -49,10 +54,8 @@ _Noreturn void ui_loader(cellulare ** main_table) {
 /*
  * Core API & Tools API calls wrappers/executables
  * Used by the cmd handler in order to avoid user error
- * !IMPORTANT! All wrappers MUST take as a parameter ONLY the main_table pointed list in the form of: cellulare ** main_table +
+ * All wrappers should take as a parameter ONLY the main_table pointed list in the form of: cellulare ** main_table
  * All functions in this category should start with "cmd_"
- *
- * +: The only function which makes an exception in this category is cmd_help, which has an unspecified number (and type) of params.
  */
 
 void cmd_display_table(cellulare ** main_table) {
@@ -61,29 +64,46 @@ void cmd_display_table(cellulare ** main_table) {
     printf("%s", str_data);
 }
 
-void cmd_list_fields(cellulare ** main_table) {
+void cmd_list_fields() {
     puts("\n");
     for (size_t i = 0; fields[i].execute; i++)
         printf("%-21s --> %s\n", fields[i].name, fields[i].description);
 }
 
+void cmd_html(cellulare ** main_table) {
+    if(export_to_HTML(main_table))
+        puts("The html file could not be generated!");
+    system("HTMl_output.html");
+}
+
+void cmd_txt(cellulare ** main_table) {
+    if (export_to_TXT(main_table))
+        puts("The txt file could not be generated!");
+    system("TXT_output.txt");
+}
+
 void cmd_sort(cellulare ** main_table) {
-    printf("Would you like to view all fields available? [y/n] --> ");
-    char buff[200];
-    while (fgets(buff, 200, stdin)) {
-        if (!strcmp(buff, "y\n")) {
-            cmd_list_fields(main_table);
+    char *u_choice = NULL;
+    while (1) {
+        u_choice = get_user_str("Would you like to view all fields available? [y/n] --> ",
+                                      "That value isn't accepted!", 2);
+        if (!strcmp(u_choice, "y")) {
+            free(u_choice);
+            cmd_list_fields();
             break;
         }
-        else if (!strcmp(buff, "n\n"))
+        else if (!strcmp(u_choice, "n")){
+            free(u_choice);
             break;
-        else
+        }
+        else {
+            free(u_choice);
             continue;
+        }
     }
 
     size_t m_t_len = main_table_len(main_table);
-    //todo add option to show available fields
-    char *field = get_user_str("\nSort by [field] --> ");
+    char * field = get_user_str("\nSort by [field] --> ", "That value is not accepted!", 20);
     if (!cell_quick_sort(main_table, sizeof(cellulare *), m_t_len, field)) {
         printf("The field you provided does not exist! No changes were made.\n");
         return;
@@ -93,6 +113,13 @@ void cmd_sort(cellulare ** main_table) {
     free(field);
 }
 
+void cmd_add(cellulare ** main_table) {
+    cellulare * r_d = get_user_cellulare(main_table);
+    if(add_cellulare(main_table, r_d))
+        puts("Could not add cellulare! Nothing was changed.");
+    free(r_d);
+}
+
 void cmd_help() {
     printf("-----------------\n| Help Section! |\n-----------------\nThe following commands are available:\n----------------------------------\n");
     for (size_t i = 0; commands[i].execute; i++)
@@ -100,7 +127,7 @@ void cmd_help() {
             printf("%s -- %s\n\n", commands[i].name, commands[i].help);
 }
 
-void cmd_unsafe_quit(cellulare ** main_table) {
+void cmd_unsafe_quit() {
     exit(0);
 }
 
@@ -112,50 +139,57 @@ void cmd_safe_quit(cellulare ** main_table) {
  * Getters and handlers + tests
  */
 
-char * get_user_str(const char * message) {
+char *get_user_str(const char *message, const char *help_line, int n_char) {
     /*
      * Returns NULL if the user exits the function
      * Remember to FREE the result
      */
-    #define STR_MAX_SIZE 20
-    fputs(message, stdout);
-    char * _str = calloc(STR_MAX_SIZE, sizeof(char));
+    int chars_to_read = 20;
+    if (n_char > 1)
+         chars_to_read = n_char;
+    char * _str = calloc(chars_to_read, sizeof(char));
 
     while (1) {
-        fgets(_str, STR_MAX_SIZE, stdin);
-        strncpy(_str, strtok(_str, "\n"), STR_MAX_SIZE - 1); // safer and avoids buffer overflows --
+        fputs(message, stdout);
+        fgets(_str, chars_to_read, stdin);
+        if (!strcmp(_str, "\n")){
+            strcpy(_str, "");
+            return _str;
+        }
+        strncpy(_str, strtok(_str, "\n"), chars_to_read - 1); // safer and avoids buffer overflows --
                                                             // BE CAREFUL string must be NULL initialized and size must be -1'd
         // validation check
-        if (strchr(_str, ' ') || !_str[0])
-            printf(HELP_LINE);
+        if (!_str[0])
+            puts(help_line);
         else
             return _str;
     }
 }
 
-int get_user_int(const char * message) {
-    // TODO fix based on get_user_str
+int get_user_int(const char *message, const char *help_line) {
+    #define CHARED_INT_MAX_SIZE 15
     /*
      * Returns NULL if the user exits the function
      */
-    fputs(message, stdout);
-    char buffer[100] = {0};
-    char * _str = calloc(20, sizeof(char));
+    char buffer[CHARED_INT_MAX_SIZE] = {0};
 
     while (1) {
-        fgets(buffer, 20, stdin);
-        _str = strtok(buffer, "\n");
+        fputs(message, stdout);
+        fgets(buffer, CHARED_INT_MAX_SIZE, stdin);
+        if (!strcmp(buffer, "\n"))
+            return 0;
+        strncpy(buffer, strtok(buffer, "\n"), CHARED_INT_MAX_SIZE - 1); // todo seg fault here
 
         // validation check
-        char *p = _str;
-        long val = 0;
+        char *p = buffer;
+        int val = 0;
         while (*p) {
             if (isdigit(*p) || ((*p == '-' || *p == '+') && isdigit(*(p + 1))))
                 val = strtol(p, &p, 10);
             else
                 p++;
             if (!val)
-                printf(HELP_LINE);
+                puts(help_line);
             else
                 return val; // the result is implicitely cast from a long to an int
         }
@@ -167,29 +201,49 @@ cellulare * get_user_cellulare(cellulare ** main_table) {
     /*
      * This function asks the user all the data necessary to build a cellulare
      * The memory is allocated on the heap so REMEMBER TO FREE IT
+     * return NULL pointer if a cellulare could not be generated
      */
-    __int8 is_valid = 0;
     cellulare * ret_cell = calloc(sizeof(cellulare), 1);
+    if (!ret_cell)
+        return NULL;
+
     ret_cell->id = main_table_len(main_table);
     printf("Input the requested data and press 'enter' to continue.\n If you want to leave a field blank "
            "press enter without entering any data.\n");
 
-    strcpy(ret_cell->name, get_user_str("Phone's name -->"));
-    ret_cell->weight = get_user_int("Weight of the phone -->");
-    ret_cell->ram = get_user_int("Ram of the phone -->");
-    ret_cell->display_ppi = get_user_int("Pixel per inch of the display -->");
-    ret_cell->id_os = get_user_int("Operating System's id -->");
-    ret_cell->id_manufacturer = get_user_int("Manufacturer's id -->");
-    ret_cell->display_size = get_user_int("Display size (inch) -->");
-    strcpy(ret_cell->display_resolution, get_user_str("Display resolution (AAAAxAAAA) -->"));
-    // strcpy(ret_cell->size, ) todo what is size?
-    strcpy(ret_cell->cpu, get_user_str("CPU (Snapdragon xxx)"));
-    strcpy(ret_cell->notes, get_user_str("Notes [max 500 char]:\n"));
+    char * buffer = NULL;
+    char * help_line = "The value you have provided is not valid";
+
+    buffer = get_user_str("Phone's name --> ",help_line, MAX_NAME);
+    strcpy(ret_cell->name, buffer);
+    free(buffer);
+    buffer = NULL;
+
+    ret_cell->weight = get_user_int("Weight of the phone --> ",help_line);
+    ret_cell->ram = get_user_int("Ram of the phone --> ",help_line);
+    ret_cell->display_ppi = get_user_int("Pixel per inch of the display --> ",help_line);
+    ret_cell->id_os = get_user_int("OS's id --> ",help_line);
+    ret_cell->id_manufacturer = get_user_int("Manufacturer's id --> ",help_line);
+    ret_cell->display_size = get_user_int("Display size (inch) --> ",help_line);
+
+    buffer = get_user_str("Display resolution (AAAAxAAAA) --> ",help_line, MAX_DISPLAY_RESOLUTION);
+    strcpy(ret_cell->display_resolution, buffer);
+    free(buffer);
+    buffer = NULL;
+
+    buffer = get_user_str("CPU (Snapdragon xxx) --> ",help_line, MAX_CPU);
+    strcpy(ret_cell->cpu, buffer);
+    free(buffer);
+    buffer = NULL;
+
+    buffer = get_user_str("Notes [max 500 char]:\n",help_line, MAX_NOTES);
+    strcpy(ret_cell->notes, buffer);
+    free(buffer);
     return ret_cell;
 }
 
 void get_user_command(cellulare ** main_table, const char * message) {
-    char * cmd = get_user_str(message);
+    char * cmd = get_user_str(message, "The value you have provided is not a string!", 0);
     cmd_handler(main_table, cmd);
     free(cmd);
 }
