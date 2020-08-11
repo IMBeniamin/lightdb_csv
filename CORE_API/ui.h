@@ -8,7 +8,7 @@ int get_user_int(const char * message);
 cellulare * get_user_cellulare(cellulare ** main_table);
 void get_user_command(cellulare ** main_table, const char * message);
 
-void cmd_handler(cellulare ** main_table, char * cmd);
+void cmd_handler(cellulare ** main_table, const char * cmd);
 void test_commands(cellulare ** main_table);
 
 // Command wrappers
@@ -18,3 +18,5 @@ void cmd_display_table(cellulare ** main_table);
 void cmd_list_fields(cellulare ** main_table);
 void cmd_sort(cellulare **main_table);
 void cmd_help();
+void cmd_safe_quit(cellulare ** main_table);
+void cmd_unsafe_quit(cellulare ** main_table);

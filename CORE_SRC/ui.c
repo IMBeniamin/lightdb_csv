@@ -5,10 +5,8 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-// TODO remember to add all funcs to the header
-
-typedef void(*functionPointerType)(cellulare **);
 #define HELP_LINE "The data you have inserted is not valid! Please use the command 'help' if you need assistance\n"
+typedef void(*functionPointerType)(cellulare **);
 
 struct commandStruct {
     char const *name;
@@ -17,11 +15,23 @@ struct commandStruct {
 };
 
 const struct commandStruct commands[] = {
-        {"display", &cmd_display_table, "Prints the main_table onto the screen."},
+        {"display", &cmd_display_table, "Prints the main_table onto the screen. Aliases: [list]"},
+        {"list", &cmd_display_table, "ignore"},
+
         {"sort", &cmd_sort, "Enters the sorting menu."},
-        {"quit", &safe_quit, "Safely exit the application. [saves changes]"},
-        {"exit", &safe_quit, "Alias for 'quit'"},
-        {"help", &cmd_help, "Shows this menu."},
+
+        {"quit", &cmd_safe_quit, "Safely exit the application. [saves changes]. Aliases: [exit, q]"},
+        {"exit", &cmd_safe_quit, "ignore"},
+        {"q", &cmd_safe_quit, "ignore"},
+
+        {"!quit", &cmd_unsafe_quit, "Exits the application WITHOUT saving changes. Aliases: [!exit, !q]"},
+        {"!exit", &cmd_unsafe_quit, "ignore"},
+        {"!q", &cmd_unsafe_quit, "ignore"},
+
+        {"help", &cmd_help, "Shows this menu. Aliases: [?, h]"},
+        {"?", &cmd_help, "ignore"},
+        {"h", &cmd_help, "ignore"},
+
         {"",0,""} //End of table indicator. MUST BE LAST!!!
 };
 
@@ -52,12 +62,13 @@ void cmd_display_table(cellulare ** main_table) {
 }
 
 void cmd_list_fields(cellulare ** main_table) {
+    puts("\n");
     for (size_t i = 0; fields[i].execute; i++)
-        printf("%s --> %s\n", fields[i].name, fields[i].description);
+        printf("%-21s --> %s\n", fields[i].name, fields[i].description);
 }
 
 void cmd_sort(cellulare ** main_table) {
-    printf("Would you like to view all fields available? [y/n]");
+    printf("Would you like to view all fields available? [y/n] --> ");
     char buff[200];
     while (fgets(buff, 200, stdin)) {
         if (!strcmp(buff, "y\n")) {
@@ -72,7 +83,7 @@ void cmd_sort(cellulare ** main_table) {
 
     size_t m_t_len = main_table_len(main_table);
     //todo add option to show available fields
-    char *field = get_user_str("\nSort by [field] -->");
+    char *field = get_user_str("\nSort by [field] --> ");
     if (!cell_quick_sort(main_table, sizeof(cellulare *), m_t_len, field)) {
         printf("The field you provided does not exist! No changes were made.\n");
         return;
@@ -85,7 +96,16 @@ void cmd_sort(cellulare ** main_table) {
 void cmd_help() {
     printf("-----------------\n| Help Section! |\n-----------------\nThe following commands are available:\n----------------------------------\n");
     for (size_t i = 0; commands[i].execute; i++)
-        printf("%s -- %s\n\n", commands[i].name, commands[i].help);
+        if (strcmp(commands[i].help, "ignore") != 0)
+            printf("%s -- %s\n\n", commands[i].name, commands[i].help);
+}
+
+void cmd_unsafe_quit(cellulare ** main_table) {
+    exit(0);
+}
+
+void cmd_safe_quit(cellulare ** main_table) {
+    safe_quit(main_table);
 }
 
 /*
@@ -97,14 +117,14 @@ char * get_user_str(const char * message) {
      * Returns NULL if the user exits the function
      * Remember to FREE the result
      */
+    #define STR_MAX_SIZE 20
     fputs(message, stdout);
-    char buffer[100] = {0};
-    char * _str = calloc(20, sizeof(char));
+    char * _str = calloc(STR_MAX_SIZE, sizeof(char));
 
     while (1) {
-        fgets(buffer, 20, stdin);
-        _str = strtok(buffer, "\n");
-
+        fgets(_str, STR_MAX_SIZE, stdin);
+        strncpy(_str, strtok(_str, "\n"), STR_MAX_SIZE - 1); // safer and avoids buffer overflows --
+                                                            // BE CAREFUL string must be NULL initialized and size must be -1'd
         // validation check
         if (strchr(_str, ' ') || !_str[0])
             printf(HELP_LINE);
@@ -114,6 +134,7 @@ char * get_user_str(const char * message) {
 }
 
 int get_user_int(const char * message) {
+    // TODO fix based on get_user_str
     /*
      * Returns NULL if the user exits the function
      */
@@ -173,16 +194,14 @@ void get_user_command(cellulare ** main_table, const char * message) {
     free(cmd);
 }
 
-void cmd_handler(cellulare ** main_table, char * cmd) {
+void cmd_handler(cellulare ** main_table, const char * cmd) {
     for (size_t i = 0; commands[i].execute; i++) {
         if(!strcmp(commands[i].name, cmd)) {
-            if (cmd) {
-                (*commands[i].execute)(main_table);
-                return;
-            }
+            (*commands[i].execute)(main_table);
+            return;
         }
     }
-    printf("WARNING: No matching command for %s.\n", cmd);
+    printf("WARNING: No matching command for %s\n", cmd);
 }
 
 void test_commands(cellulare ** main_table) {
