@@ -24,15 +24,20 @@ int add_cellulare(cellulare ** main_table, cellulare * r_d) {
     return 0;
 }
 
-void delete_cellulare(cellulare ** main_table, int del_i) {
+int delete_cellulare(cellulare ** main_table, unsigned int delete_index) {
     int m_t_len = main_table_len(main_table);
-    free(main_table[del_i]);
+    cellulare ** main_table_safeguard = realloc(main_table, (m_t_len-1) * sizeof(cellulare*));
+    if (!main_table_safeguard)
+        return 1;
 
-    for (; del_i < m_t_len; del_i++){
-        main_table[del_i] = main_table[del_i+1];
-        if (main_table[del_i])
-            main_table[del_i]->id--;
+    main_table = main_table_safeguard;
+
+    free(main_table[delete_index]);
+
+    for (; delete_index < m_t_len; delete_index++){
+        main_table[delete_index] = main_table[delete_index + 1];
+        if (main_table[delete_index])
+            main_table[delete_index]->id--;
     }
-    // TODO consider doing a realloc to reduce main_table's size after deletion
-    //main_table = realloc(main_table, del_i* sizeof(cellulare*));
+    return 0;
 }

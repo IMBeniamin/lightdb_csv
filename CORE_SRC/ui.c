@@ -23,7 +23,11 @@ const struct commandStruct commands[] = {
 
         {"txt", &cmd_txt, "Creates the file TXT_output.txt which contains the main table formatted in txt"},
 
+        {"search", &cmd_search, "Search a cellulare in the table based on a series of parameters"},
+
         {"add", &cmd_add, "Asks the user all the data needed to generate a new cellualre and adds it to the main table"},
+
+        {"del", &cmd_del, "Asks the user the id of the element he wishes to delete and safely removes it from the main table"},
 
         {"quit", &cmd_safe_quit, "Safely exit the application. [saves changes]. Aliases: [exit, q]"},
         {"exit", &cmd_safe_quit, "ignore"},
@@ -113,11 +117,36 @@ void cmd_sort(cellulare ** main_table) {
     free(field);
 }
 
+void cmd_search(cellulare ** main_table) {
+    char * raw_parameters = get_user_str("Write the parameters separated by spaces [8000 Galaxy 563 s20]:\n",
+                 "The data you inserted is not valid!", MAX_PARAM_DATA_SIZE);
+    search_menu(main_table, raw_parameters);
+}
+
 void cmd_add(cellulare ** main_table) {
     cellulare * r_d = get_user_cellulare(main_table);
     if(add_cellulare(main_table, r_d))
         puts("Could not add cellulare! Nothing was changed.");
+    else
+        puts("Successfuly added cellulare.");
     free(r_d);
+}
+
+void cmd_del(cellulare ** main_table) {
+    unsigned int delete_index;
+    unsigned int last_index = main_table_len(main_table);
+    char * help_line = "Id non valido!";
+    while (1) {
+        delete_index = get_user_int("Id of the element to be deleted --> ", help_line);
+        if (0 <= delete_index < last_index)
+            break;
+        else
+            puts(help_line);
+    }
+    if(delete_cellulare(main_table, delete_index-1))
+        puts("Could not delete cellulare! Nothing was changed.");
+    else
+        puts("Successfuly deleted cellulare.");
 }
 
 void cmd_help() {
@@ -231,7 +260,7 @@ cellulare * get_user_cellulare(cellulare ** main_table) {
     free(buffer);
     buffer = NULL;
 
-    buffer = get_user_str("CPU (Snapdragon xxx) --> ",help_line, MAX_CPU);
+    buffer = get_user_str("CPU (A core Aghz) --> ",help_line, MAX_CPU);
     strcpy(ret_cell->cpu, buffer);
     free(buffer);
     buffer = NULL;

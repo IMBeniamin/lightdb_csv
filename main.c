@@ -19,12 +19,12 @@ int main(int argc, char *argv[]) {
  * 1) Caricamento da file cellulari.csv in vettore di “struct cellulare”
  * 2) Ordinamenti (almeno 2 diversi)
  * 3) Visualizzazione (su file cellulari.html / cellulari.txt)
- * TODO 4) Ricerca (per almeno due campi) e visualizzazione del cellulare cercato
- * TODO [only UI] 5) Cancellazione (in memoria) di un cellulare
+ * TODO [NOT WORKING] 4) Ricerca (per almeno due campi) e visualizzazione del cellulare cercato
+ * 5) Cancellazione (in memoria) di un cellulare
  * 6) Inserimento (da tastiera nel vettore in memoria) di un nuovo cellulare
  * 7) Salvataggio (su file cellulari.csv) del vettore in memoria (Se modificato).
- *
- * TODO FACOLTATIVO 8) Immettere un campo “immagine” nella struct cellulare e fare in modo che dal file cellulari.html si “veda” l'immagine del cellulare
- * TODO FACOLTATIVO 9) Aggiungi funzione undo/redo
- * TODO FACOLTATIVO 10) Add debugging/timing functions
+ * TODO 8) Crea comando sel
+ * TODO FACOLTATIVO 9) Immettere un campo “immagine” nella struct cellulare e fare in modo che dal file cellulari.html si “veda” l'immagine del cellulare
+ * TODO FACOLTATIVO 10) Aggiungi funzione undo/redo
+ * TODO FACOLTATIVO 11) Add debugging/timing functions
  */
