@@ -107,6 +107,7 @@ void cmd_sort(cellulare ** main_table) {
     }
 
     size_t m_t_len = main_table_len(main_table);
+    fflush(stdin);
     char * field = get_user_str("\nSort by [field] --> ", "That value is not accepted!", 20);
     if (!cell_quick_sort(main_table, sizeof(cellulare *), m_t_len, field)) {
         printf("The field you provided does not exist! No changes were made.\n");
@@ -121,6 +122,10 @@ void cmd_search(cellulare ** main_table) {
     char * raw_parameters = get_user_str("Write the parameters separated by spaces [8000 Galaxy 563 s20]:\n",
                  "The data you inserted is not valid!", MAX_PARAM_DATA_SIZE);
     search_menu(main_table, raw_parameters);
+}
+
+void cmd_select(cellulare ** main_table) {
+
 }
 
 void cmd_add(cellulare ** main_table) {
@@ -153,7 +158,7 @@ void cmd_help() {
     printf("-----------------\n| Help Section! |\n-----------------\nThe following commands are available:\n----------------------------------\n");
     for (size_t i = 0; commands[i].execute; i++)
         if (strcmp(commands[i].help, "ignore") != 0)
-            printf("%s -- %s\n\n", commands[i].name, commands[i].help);
+            printf("%s -- %s\n", commands[i].name, commands[i].help);
 }
 
 void cmd_unsafe_quit() {
@@ -207,7 +212,7 @@ int get_user_int(const char *message, const char *help_line) {
         fgets(buffer, CHARED_INT_MAX_SIZE, stdin);
         if (!strcmp(buffer, "\n"))
             return 0;
-        strncpy(buffer, strtok(buffer, "\n"), CHARED_INT_MAX_SIZE - 1); // todo seg fault here
+        strncpy(buffer, strtok(buffer, "\n"), CHARED_INT_MAX_SIZE - 1);
 
         // validation check
         char *p = buffer;

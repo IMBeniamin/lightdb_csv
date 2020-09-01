@@ -4,7 +4,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <shlwapi.h>
+#include <malloc.h>
+//#include <shlwapi.h> //used for alternative strstr
 
 void push(struct parameter * head_node, char * new_data, uint32 data_size) {
     struct parameter * new_parameter = calloc(1, sizeof(struct parameter));
@@ -44,7 +45,7 @@ struct parameter * get_structured_parameters(char * raw_parameters) {
 uint32 get_occourences(const char * serialized_data, const char * parameter) {
     int count = 0;
     const char *tmp = serialized_data;
-    while((tmp = StrStrA(tmp, parameter))) { // using windows' version for non case sensitive comparison
+    while((tmp = strstr(tmp, parameter))) { // using windows' version for non case sensitive comparison
         count++;
         tmp++;
     }
@@ -85,35 +86,52 @@ void iterate_parameters(cellulare ** main_table, struct parameter * head_paramet
         iterate_main_table(main_table, current->data, search_table);
 }
 
-int in_array(const int * array, size_t array_len, size_t value) {
+int in_array(const int *array, uint32 array_len, uint32 value) {
     for (int i = 0; i < array_len; i++)
         if (value == array[i])
             return 1;
     return 0;
 }
 
-int * find_best(const uint32 * search_table, uint32 search_table_len, uint32 search_results_n) {
-    int * high_to_low = malloc(search_results_n * sizeof(uint32));
-
-    for (size_t i = 0; i < search_results_n; i++) {
-        high_to_low[i] = -1;
+uint32 find_max(const uint32 * array, const uint32 len) {
+    uint32 max = 0;
+    for (uint32 i = 1; i < len; i++) {
+        if(array[i] > array[max])
+            max = i;
     }
+    return max;
+}
 
-    for (size_t pow_index = 0; pow_index < search_results_n; pow_index++) {
-        high_to_low[pow_index] = (int)search_table[0];
-        for (size_t i = 1; i < search_table_len; i++) {
-            if (search_table[i] > high_to_low[pow_index] && !in_array(high_to_low, search_results_n, i))
-                high_to_low[pow_index] = i;
-        }
+int * find_best(uint32 * search_table, uint32 search_table_len, int * search_results, uint32 search_results_n) {
+//    puts("--------------------------------------------------------");
+//    for (int i = 0; i < search_table_len; i++) {
+//        printf("%d, ", search_table[i]);
+//    }
+//    puts("\n--------------------------------------------------------");
+//
+//    puts("--------------------------------------------------------");
+//    for (int i = 0; i < search_results_n; i++) {
+//        printf("%d, ", search_results[i]);
+//    }
+//    puts("\n--------------------------------------------------------");
+
+
+    uint32 max_index;
+    for ( uint32 i = 0; i < search_results_n; i++) {
+        max_index = find_max(search_table, search_table_len);
+        if (in_array(search_results, search_results_n, max_index))
+            break;
+        search_results[i] = (int)max_index;
+        search_table[max_index] = 0;
     }
-    return high_to_low;
+    return search_results;
 }
 
 void out_search_result(cellulare ** main_table, const int * search_results) {
     puts("The following results have been found:");
     for (size_t i = 0; i < MAX_PRINTED_RESULTS; i++) {
         char buff[CELLULARE_STRING_LINE_SIZE] = {0};
-        if (search_results[i] > 0) {
+        if (search_results[i] >= 0) {
             sprintf(buff, "%d) ", i+1);
             concat_cellulare_string(main_table[search_results[i]], buff);
             printf("%s", buff);
@@ -122,16 +140,27 @@ void out_search_result(cellulare ** main_table, const int * search_results) {
 }
 
 void search_menu(cellulare ** main_table, char * raw_parameters) {
-    // TODO consider allocating search_results beforehand and passing it into the function
+    // consider allocating search_results beforehand and passing it into the function
+    size_t search_table_len = main_table_len(main_table);
     struct parameter * head_parameter = get_structured_parameters(raw_parameters);
-    uint32 * search_table = calloc(main_table_len(main_table), sizeof(uint32));
+    uint32 * search_table = calloc(search_table_len, sizeof(uint32));
+    int * search_results = calloc(MAX_PRINTED_RESULTS, sizeof(int));
+    for (uint32 i = 0; i < MAX_PRINTED_RESULTS; i++) // consider refactoring to function
+        search_results[i] = -1;
 
     iterate_parameters(main_table, head_parameter, search_table);
+    puts("search table:");
+    for (int i = 0; i < search_table_len; i++) {
+        printf("id: %d -- %d\n",i+1, search_table[i]);
+    }
 
-    size_t search_table_len = main_table_len(main_table);
-    int * search_results = find_best(search_table, search_table_len, MAX_PRINTED_RESULTS);
+    find_best(search_table, search_table_len, search_results, MAX_PRINTED_RESULTS);
+//    puts("search results:");
+//    for (int i = 0; i < MAX_PRINTED_RESULTS; i++)
+//        printf("%d) %d\n",i+1, search_results[i]);
 
     out_search_result(main_table, search_results);
+
     free(search_results);
     free(search_table);
 

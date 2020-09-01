@@ -5,14 +5,14 @@
 #define MAX_PARAM_DATA_SIZE 200
 #define uint32 unsigned int
 
-// todo create linked list template to be used multiple times
+// consider creating linked list template to be used multiple times
 
 struct parameter {
     char * data;
     struct parameter * next;
 };
 
-int in_array(const int * array, uint32 array_len, uint32 value);
+int in_array(const int *array, uint32 array_len, uint32 value);
 char * serialize_cellulare(cellulare * data);
 uint32 get_occourences(const char * serialized_data, const char * parameter);
 struct parameter * get_structured_parameters(char * raw_parameters);
@@ -23,6 +23,6 @@ void iterate_main_table(cellulare ** main_table, const char * parameter, uint32 
 uint32 iterate_cellulare(cellulare * data, const char * paramter);
 
 
-int * find_best(const uint32 * search_table, uint32 search_table_len, uint32 search_results_n);
+int * find_best(uint32 * search_table, uint32 search_table_len, int * search_results, uint32 search_results_n);
 void out_search_result(cellulare ** main_table, const int * search_results);
 void search_menu(cellulare ** main_table, char * raw_parameters);
