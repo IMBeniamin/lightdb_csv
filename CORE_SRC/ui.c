@@ -27,7 +27,10 @@ const struct commandStruct commands[] = {
 
         {"add", &cmd_add, "Asks the user all the data needed to generate a new cellualre and adds it to the main table"},
 
-        {"del", &cmd_del, "Asks the user the id of the element he wishes to delete and safely removes it from the main table"},
+        {"delete", &cmd_del, "Asks the user the id of the element he wishes to delete and safely removes it from the main table. Aliases: [del]"},
+        {"del", &cmd_del, "ignore"},
+
+        {"view", &cmd_view, "Asks the user the id of an element and then prints all of its details."},
 
         {"quit", &cmd_safe_quit, "Safely exit the application. [saves changes]. Aliases: [exit, q]"},
         {"exit", &cmd_safe_quit, "ignore"},
@@ -87,25 +90,8 @@ void cmd_txt(cellulare ** main_table) {
 }
 
 void cmd_sort(cellulare ** main_table) {
-    char *u_choice = NULL;
-    while (1) {
-        u_choice = get_user_str("Would you like to view all fields available? [y/n] --> ",
-                                      "That value isn't accepted!", 2);
-        if (!strcmp(u_choice, "y")) {
-            free(u_choice);
-            cmd_list_fields();
-            break;
-        }
-        else if (!strcmp(u_choice, "n")){
-            free(u_choice);
-            break;
-        }
-        else {
-            free(u_choice);
-            continue;
-        }
-    }
-
+    if (get_user_y_n("Would you like to view all fields available? [y/n] --> ", "That value isn't accepted!"))
+        cmd_list_fields(); // todo test
     size_t m_t_len = main_table_len(main_table);
     fflush(stdin);
     char * field = get_user_str("\nSort by [field] --> ", "That value is not accepted!", 20);
@@ -124,8 +110,13 @@ void cmd_search(cellulare ** main_table) {
     search_menu(main_table, raw_parameters);
 }
 
-void cmd_select(cellulare ** main_table) {
-
+void cmd_view(cellulare ** main_table) {
+    uint32 id = get_user_int("Id of the cellulare --> ", "Invalid id!\n");
+    char data[CELLULARE_STRING_LINE_SIZE]; data[0] = '\0';
+    concat_cellulare_string(main_table[id-1], data);
+    printf("%s", data);
+    if (get_user_y_n("Do you want to see more details [y/n] --> ", "That value isn't valid!\n"))
+        print_hidden(main_table[id-1]);
 }
 
 void cmd_add(cellulare ** main_table) {
@@ -195,8 +186,29 @@ char *get_user_str(const char *message, const char *help_line, int n_char) {
         // validation check
         if (!_str[0])
             puts(help_line);
-        else
+        else {
+            fflush(stdin);
             return _str;
+        }
+    }
+}
+
+int get_user_y_n(const char *message, const char *help_line) {
+    char * u_choice = NULL;
+    while (1) {
+        u_choice = get_user_str(message, help_line, 2);
+        if (!strcmp(u_choice, "y")) {
+            free(u_choice);
+            return 1;
+        }
+        else if (!strcmp(u_choice, "n")){
+            free(u_choice);
+            return 0;
+        }
+        else {
+            free(u_choice);
+            continue;
+        }
     }
 }
 

@@ -86,16 +86,6 @@ void generate_string (cellulare ** main_table, char * w_d) {
     //TODO consider adding all struct members
     for (; *main_table; main_table++)
         concat_cellulare_string(*(main_table), w_d);
-//        char _generated_line[CELLULARE_STRING_LINE_SIZE] = {0};
-//        sprintf(_generated_line, "|%4d|%20s|%5d|%21s|%13d|%14f|%20s|\n",
-//                (*main_table)->id,
-//                (*main_table)->name,
-//                (*main_table)->ram,
-//                (*main_table)->cpu,
-//                (*main_table)->display_ppi,
-//                (*main_table)->display_size,
-//                (*main_table)->display_resolution);
-//        strcat(w_d, _generated_line);
 }
 
 int export_to_HTML(cellulare ** main_table) {
@@ -159,4 +149,11 @@ int comp_cell(cellulare * b_cell, const void * c_ag) {
     if (valid_str(c_cell->notes) && strcmp(c_cell->notes, b_cell->notes) == 0)
         checks++;
     return checks;
+}
+
+void print_hidden(cellulare * cell) {
+    printf("Manufacturer id: %d\n", cell->id_manufacturer);
+    printf("Operating System's id: %d\n", cell->id_os);
+    printf("Weight: %d\n", cell->weight);
+    printf("Notes:\n%s", cell->notes);
 }

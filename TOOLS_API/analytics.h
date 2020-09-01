@@ -12,3 +12,4 @@ int export_to_HTML(cellulare ** main_table);
 int export_to_TXT(cellulare ** main_table);
 
 int comp_cell(cellulare * b_cell, const void * c_ag);
+void print_hidden(cellulare * cell);
