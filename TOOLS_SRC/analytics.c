@@ -30,6 +30,7 @@ int prep_ante(FILE * analyt_html) {
                            "            <th>DISPALY_PPI</th>\n"
                            "            <th>DISPLAY_SIZE</th>\n"
                            "            <th>DISPLAY_RESOLUTION</th>\n"
+                           "            <th>IMAGE</th>\n"
                            "        </tr>\n";
     size_t res = write_str_to_file(prep_ante_app, analyt_html);
 
@@ -48,13 +49,16 @@ void prep_cont(cellulare ** main_table, FILE * analyt_html) {
                       "            <th>%d</th>\n"
                       "            <th>%f</th>\n"
                       "            <th>%s</th>\n"
-                      "        </tr>\n",(*main_table)->id,
-                (*main_table)->name,
-                (*main_table)->ram,
-                (*main_table)->cpu,
-                (*main_table)->display_ppi,
-                (*main_table)->display_size,
-                (*main_table)->display_resolution);
+                      "            <th><img style=\"width: 80px; height: 80px;\" src=\"res\\%s.jpg\"></th>\n"
+                      "        </tr>\n",
+                                (*main_table)->id,
+                                (*main_table)->name,
+                                (*main_table)->ram,
+                                (*main_table)->cpu,
+                                (*main_table)->display_ppi,
+                                (*main_table)->display_size,
+                                (*main_table)->display_resolution,
+                                (*main_table)->name);
         write_str_to_file(_tbw, analyt_html);
     }
 }
