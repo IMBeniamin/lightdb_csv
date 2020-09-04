@@ -5,7 +5,8 @@ _Noreturn void ui_loader(cellulare ** main_table);
 
 char *get_user_str(const char *message, const char *help_line, int n_char);
 int get_user_y_n(const char *message, const char *help_line);
-int get_user_int(const char *message, const char *help_line);
+int get_user_int(const char *message, const char *help_line, int ROOF_VAL, int FLOOR_VAL);
+double get_user_double(const char *message, const char *help_line, double ROOF_VAL, double FLOOR_VAL);
 cellulare * get_user_cellulare(cellulare ** main_table);
 void get_user_command(cellulare ** main_table, const char * message);
 

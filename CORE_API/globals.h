@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef CSV_DATABASE_GLOBALS_H
+#define CSV_DATABASE_GLOBALS_H
 /*
  * Global naming conventions:
  * w_d = write_data (data to be written [might be used with an appended (f) which means that the data is formatted]
@@ -10,7 +10,7 @@
 #define MAX_CPU 20
 #define MAX_NAME 40
 #define MAX_NOTES 500
-
+#define uint32 unsigned int
 typedef struct telefono_cellulare {
     unsigned int id;
     unsigned int weight;
@@ -29,3 +29,7 @@ typedef struct telefono_cellulare {
 typedef struct String {
     char data[100];
 }string;
+
+extern uint32 MODIFIED_FILE_DATA_FLAG;
+
+#endif //CSV_DATABASE_GLOBALS_H

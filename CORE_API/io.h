@@ -17,15 +17,15 @@ void free_main_table(cellulare * main_table);
 void free_main_table_p(cellulare ** main_table);
 void read_cellulare(FILE *r_d, cellulare * w_d);
 
-unsigned int write_str_to_file(const char * r_d, FILE * w_d);
-unsigned int write_cell_to_file(cellulare * r_d, FILE * w_d);
+uint32 write_str_to_file(const char * r_d, FILE * w_d);
+uint32 write_cell_to_file(cellulare * r_d, FILE * w_d);
 
 FILE * open_file(const char * file_name, const char * mode);
 
 size_t main_table_len(cellulare ** main_table);
 
-int check_modified(cellulare ** main_table);
+uint32 check_modified(cellulare ** main_table);
 
-unsigned int write_table_to_file(cellulare ** main_table);
+uint32 write_table_to_file(cellulare ** main_table);
 
 void safe_quit(cellulare ** main_table);

@@ -21,23 +21,29 @@ int add_cellulare(cellulare ** main_table, cellulare * r_d) {
         main_table[new_table_len-1] = cellulare_safeguard;
     *(main_table[new_table_len-1]) = *r_d;
     main_table[new_table_len] = NULL;
+    MODIFIED_FILE_DATA_FLAG = 1;
     return 0;
 }
 
 int delete_cellulare(cellulare ** main_table, unsigned int delete_index) {
-    int m_t_len = main_table_len(main_table);
-    cellulare ** main_table_safeguard = realloc(main_table, (m_t_len-1) * sizeof(cellulare*));
-    if (!main_table_safeguard)
+    size_t m_t_len = main_table_len(main_table) + 1; // +1 perche NULL termination
+    if (m_t_len < 2)
         return 1;
+    unsigned int new_m_t_len = m_t_len - 1;
+    cellulare ** main_table_safeguard = realloc(main_table, new_m_t_len * sizeof(cellulare*));
+    if (!main_table_safeguard)
+        return 2;
 
     main_table = main_table_safeguard;
 
     free(main_table[delete_index]);
 
-    for (; delete_index < m_t_len; delete_index++){
+    for (; delete_index < new_m_t_len-1; delete_index++){
         main_table[delete_index] = main_table[delete_index + 1];
         if (main_table[delete_index])
             main_table[delete_index]->id--;
     }
+    main_table[new_m_t_len-1] = NULL;
+    MODIFIED_FILE_DATA_FLAG = 1;
     return 0;
 }

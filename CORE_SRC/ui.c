@@ -69,6 +69,7 @@ void cmd_display_table(cellulare ** main_table) {
     char * str_data = calloc(main_table_len(main_table) * CELLULARE_STRING_LINE_SIZE + 1, sizeof(char));
     generate_string(main_table, str_data);
     printf("%s", str_data);
+    free(str_data);
 }
 
 void cmd_list_fields() {
@@ -105,13 +106,16 @@ void cmd_sort(cellulare ** main_table) {
 }
 
 void cmd_search(cellulare ** main_table) {
-    char * raw_parameters = get_user_str("Write the parameters separated by spaces [8000 Galaxy 563 s20]:\n",
+    char * raw_parameters = get_user_str("Write search parameters separated by space [partial parameters are accepted] [parameters can be of any type] [search is NOT case sensitive]:\n",
                  "The data you inserted is not valid!", MAX_PARAM_DATA_SIZE);
     search_menu(main_table, raw_parameters);
+    free(raw_parameters);
 }
 
 void cmd_view(cellulare ** main_table) {
-    uint32 id = get_user_int("Id of the cellulare --> ", "Invalid id!\n");
+    uint32 id;
+    uint32 m_t_len = main_table_len(main_table);
+    id = get_user_int("Id of the cellulare --> ", "Invalid id!\n", (int)m_t_len+1, 0);
     char data[CELLULARE_STRING_LINE_SIZE]; data[0] = '\0';
     concat_cellulare_string(main_table[id-1], data);
     printf("%s", data);
@@ -132,14 +136,8 @@ void cmd_del(cellulare ** main_table) {
     unsigned int delete_index;
     unsigned int last_index = main_table_len(main_table);
     char * help_line = "Id non valido!";
-    while (1) {
-        delete_index = get_user_int("Id of the element to be deleted --> ", help_line);
-        if (0 <= delete_index < last_index)
-            break;
-        else
-            puts(help_line);
-    }
-    if(delete_cellulare(main_table, delete_index-1))
+    delete_index = get_user_int("Id of the element to be deleted --> ", help_line, (int)last_index+1, -1);
+    if(delete_cellulare(main_table, delete_index))
         puts("Could not delete cellulare! Nothing was changed.");
     else
         puts("Successfuly deleted cellulare.");
@@ -166,28 +164,36 @@ void cmd_safe_quit(cellulare ** main_table) {
 
 char *get_user_str(const char *message, const char *help_line, int n_char) {
     /*
+     * @n_char - this parameter is "optional" If the user passes 0 it's considered to be 21 by default
      * Returns NULL if the user exits the function
      * Remember to FREE the result
      */
-    int chars_to_read = 20;
+    int chars_to_read = 21;
+    char terminated = 0;
     if (n_char > 1)
-         chars_to_read = n_char;
+         chars_to_read = n_char+2;
     char * _str = calloc(chars_to_read, sizeof(char));
 
     while (1) {
         fputs(message, stdout);
         fgets(_str, chars_to_read, stdin);
-        if (!strcmp(_str, "\n")){
+        fflush(stdin);
+        if (!strcmp(_str, "\n")) {
             strcpy(_str, "");
             return _str;
         }
-        strncpy(_str, strtok(_str, "\n"), chars_to_read - 1); // safer and avoids buffer overflows --
-                                                            // BE CAREFUL string must be NULL initialized and size must be -1'd
+        if (strstr(_str, "\n")) {
+            strncpy(_str, strtok(_str, "\n"), chars_to_read - 1);
+            terminated = 1;
+        }
+
         // validation check
         if (!_str[0])
             puts(help_line);
         else {
-            fflush(stdin);
+            if (!terminated)
+                printf("More characters than necessary have been provided, everything after ...%c%c%c%c[...] has been ignored\n",
+                        _str[chars_to_read-5],_str[chars_to_read-4],_str[chars_to_read-3],_str[chars_to_read-2]);
             return _str;
         }
     }
@@ -212,17 +218,16 @@ int get_user_y_n(const char *message, const char *help_line) {
     }
 }
 
-int get_user_int(const char *message, const char *help_line) {
+/*int get_user_int(const char *message, const char *help_line, int ROOF_VAL, int FLOOR_VAL) {
     #define CHARED_INT_MAX_SIZE 15
-    /*
-     * Returns NULL if the user exits the function
-     */
+    // Returns NULL if the user exits the function
     char buffer[CHARED_INT_MAX_SIZE] = {0};
 
     while (1) {
         fputs(message, stdout);
         fgets(buffer, CHARED_INT_MAX_SIZE, stdin);
-        if (!strcmp(buffer, "\n"))
+        fflush(stdin);
+        if (!strcmp(buffer, "\n")) // checks if the buffer is not empty
             return 0;
         strncpy(buffer, strtok(buffer, "\n"), CHARED_INT_MAX_SIZE - 1);
 
@@ -233,28 +238,63 @@ int get_user_int(const char *message, const char *help_line) {
             if (isdigit(*p) || ((*p == '-' || *p == '+') && isdigit(*(p + 1))))
                 val = strtol(p, &p, 10);
             else
-                p++;
-            if (!val)
-                puts(help_line);
-            else
+                break;
+            if (val && (val > FLOOR_VAL && val < ROOF_VAL))
                 return val; // the result is implicitely cast from a long to an int
         }
+        puts(help_line);
+    }
+}
+*/
+
+int get_user_int(const char *message, const char *help_line, int ROOF_VAL, int FLOOR_VAL) {
+    return (int)get_user_double(message, help_line, ROOF_VAL, FLOOR_VAL);
+}
+
+double get_user_double(const char *message, const char *help_line, double ROOF_VAL, double FLOOR_VAL) {
+    #define CHARED_INT_MAX_SIZE 311 // char occupati da: (1,8 * 10^308)
+    char buffer[CHARED_INT_MAX_SIZE] = {0};
+
+    while (1) {
+        fputs(message, stdout);
+        fgets(buffer, CHARED_INT_MAX_SIZE, stdin);
+        fflush(stdin);
+        if (!strcmp(buffer, "\n")) // checks if the buffer is not empty
+            return 0;
+        strncpy(buffer, strtok(buffer, "\n"), CHARED_INT_MAX_SIZE - 1);
+
+        // validation check
+        char *p = buffer;
+        double val = 0;
+
+        if (isdigit(*p) || ((*p == '-' || *p == '+') && isdigit(*(p + 1))))
+            val = strtod(p, &p);
+        if (val && (val > FLOOR_VAL && val < ROOF_VAL)) {
+            // check if string has alpha after number
+            while (*p)
+                if (!isdigit(*p)){
+                    puts("All non digit characters have been ignored!");
+                    break;
+                }
+            return val;
+        }
+
+        puts(help_line);
     }
 }
 
 cellulare * get_user_cellulare(cellulare ** main_table) {
-    //TODO not tested
     /*
      * This function asks the user all the data necessary to build a cellulare
      * The memory is allocated on the heap so REMEMBER TO FREE IT
      * return NULL pointer if a cellulare could not be generated
      */
-    cellulare * ret_cell = calloc(sizeof(cellulare), 1);
+    cellulare * ret_cell = calloc(1, sizeof(cellulare));
     if (!ret_cell)
         return NULL;
 
     ret_cell->id = main_table_len(main_table);
-    printf("Input the requested data and press 'enter' to continue.\n If you want to leave a field blank "
+    printf("Input the requested data and press 'enter' to continue.\nIf you want to leave a field blank "
            "press enter without entering any data.\n");
 
     char * buffer = NULL;
@@ -262,15 +302,14 @@ cellulare * get_user_cellulare(cellulare ** main_table) {
 
     buffer = get_user_str("Phone's name --> ",help_line, MAX_NAME);
     strcpy(ret_cell->name, buffer);
-    free(buffer);
-    buffer = NULL;
+    free(buffer); buffer = NULL;
 
-    ret_cell->weight = get_user_int("Weight of the phone --> ",help_line);
-    ret_cell->ram = get_user_int("Ram of the phone --> ",help_line);
-    ret_cell->display_ppi = get_user_int("Pixel per inch of the display --> ",help_line);
-    ret_cell->id_os = get_user_int("OS's id --> ",help_line);
-    ret_cell->id_manufacturer = get_user_int("Manufacturer's id --> ",help_line);
-    ret_cell->display_size = get_user_int("Display size (inch) --> ",help_line);
+    ret_cell->weight = get_user_int("Weight of the phone --> ",help_line, 2000, 0);
+    ret_cell->ram = get_user_int("Ram of the phone --> ",help_line, 100000, 0);
+    ret_cell->display_ppi = get_user_int("Pixel per inch of the display --> ",help_line, 1000, 0);
+    ret_cell->id_os = get_user_int("OS's id --> ",help_line, 20, 0);
+    ret_cell->id_manufacturer = get_user_int("Manufacturer's id --> ",help_line, 20, 0);
+    ret_cell->display_size = get_user_double("Display size (inch) --> ",help_line,15, 0);
 
     buffer = get_user_str("Display resolution (AAAAxAAAA) --> ",help_line, MAX_DISPLAY_RESOLUTION);
     strcpy(ret_cell->display_resolution, buffer);

@@ -3,7 +3,6 @@
 
 #define MAX_PRINTED_RESULTS 5
 #define MAX_PARAM_DATA_SIZE 200
-#define uint32 unsigned int
 
 // consider creating linked list template to be used multiple times
 
@@ -22,7 +21,7 @@ void iterate_parameters(cellulare ** main_table, struct parameter * head_paramet
 void iterate_main_table(cellulare ** main_table, const char * parameter, uint32 * search_table);
 uint32 iterate_cellulare(cellulare * data, const char * paramter);
 
-
+int find_max(const uint32 * array, uint32 len);
 int * find_best(uint32 * search_table, uint32 search_table_len, int * search_results, uint32 search_results_n);
 void out_search_result(cellulare ** main_table, const int * search_results);
 void search_menu(cellulare ** main_table, char * raw_parameters);

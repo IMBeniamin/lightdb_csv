@@ -27,6 +27,8 @@ struct field {
     char * description;
 };
 
+int strcicmp(char const *a, char const *b);
+
 extern const struct field fields[];
 
 int cell_quick_sort(cellulare ** main_table, size_t element_size, size_t nitems, char * member);

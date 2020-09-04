@@ -13,3 +13,4 @@ int export_to_TXT(cellulare ** main_table);
 
 int comp_cell(cellulare * b_cell, const void * c_ag);
 void print_hidden(cellulare * cell);
+void tolowerstring(const char * mixed_str, char * res_string, size_t MAX);

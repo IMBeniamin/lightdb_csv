@@ -1,5 +1,5 @@
 #include "../TOOLS_API/sorting.h"
-#include <string.h>
+#include <ctype.h>
 
 const struct field fields[] = {
         {"id", &id_compare, "ID of the product"},
@@ -15,6 +15,14 @@ const struct field fields[] = {
         {"notes", &notes_compare, "Aditional information about the device"},
         {"", 0, ""} // END OF TABLE INDICATOR, MUST BE LAST
 };
+
+int strcicmp(char const *a, char const *b){
+    for (;; a++, b++) {
+        int d = tolower((unsigned char)*a) - tolower((unsigned char)*b);
+        if (d != 0 || !*a)
+            return d;
+    }
+}
 
 int id_compare(const void* a, const void* b) {
     // a = puntatore a puntatore di struct
@@ -78,38 +86,38 @@ int disp_size_compare(const void* a, const void* b) {
 int disp_res_compare(const void* a, const void* b) {
     const cellulare * arg1 = (const cellulare *) *(const cellulare**) a;
     const cellulare * arg2 = (const cellulare *) *(const cellulare**) b;
-    return strcmp(arg1->display_resolution, arg2->display_resolution);
+    return strcicmp(arg1->display_resolution, arg2->display_resolution);
 }
 
 int cpu_compare(const void* a, const void* b) {
     const cellulare * arg1 = (const cellulare *) *(const cellulare**) a;
     const cellulare * arg2 = (const cellulare *) *(const cellulare**) b;
-    return strcmp(arg1->cpu, arg2->cpu);
+    return strcicmp(arg1->cpu, arg2->cpu);
 }
 
 int name_compare(const void* a, const void* b) {
     const cellulare * arg1 = (const cellulare *) *(const cellulare**) a;
     const cellulare * arg2 = (const cellulare *) *(const cellulare**) b;
-    return strcmp(arg1->name, arg2->name);
+    return strcicmp(arg1->name, arg2->name);
 }
 
 int notes_compare(const void* a, const void* b) {
     const cellulare * arg1 = (const cellulare *) *(const cellulare**) a;
     const cellulare * arg2 = (const cellulare *) *(const cellulare**) b;
-    return strcmp(arg1->notes, arg2->notes);
+    return strcicmp(arg1->notes, arg2->notes);
 }
 
 // Doesn't need a prototype
 comparator_func get_comp_func(char * member) {
     for (size_t i = 0; fields[i].execute; i++) {
-        if(!strcmp(member, fields[i].name))
+        if(!strcicmp(member, fields[i].name))
             return fields[i].execute;
     }
     return NULL;
 }
 
 int cell_quick_sort(cellulare **main_table, size_t element_size, size_t nitems, char *member) {
-    // TODO add reversed param && testing
+    // TODO add reversed param
 
     /// returns 0 if failed
     comparator_func c_f = get_comp_func(member);

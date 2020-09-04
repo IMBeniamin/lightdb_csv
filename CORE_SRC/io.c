@@ -25,7 +25,7 @@ FILE * open_file(const char * file_name, const char * mode) {
         return NULL;
 }
 
-unsigned int write_str_to_file(const char * r_d, FILE * w_d) {
+uint32 write_str_to_file(const char * r_d, FILE * w_d) {
     return fwrite(r_d, 1, strlen(r_d), w_d);
 }
 
@@ -43,7 +43,7 @@ void read_cellulare(FILE *r_d, cellulare * w_d) {
     token = strtok(NULL, ",");
     w_d->display_ppi = token ? strtol(token, NULL, 10) : 0;
     token = strtok(NULL, ",");
-    w_d->display_size = token ? strtol(token, NULL, 10) : 0;
+    w_d->display_size = token ? strtof(token, NULL) : 0;
     token = strtok(NULL, ",");
     token[strlen(token) - 1] = 0;
     strcpy(w_d->display_resolution, token);
@@ -136,27 +136,29 @@ size_t main_table_len(cellulare ** main_table) {
     return i;
 }
 
-int check_modified(cellulare ** main_table) {
-    FILE * csv_table = open_cell_file("r");
+uint32 check_modified(cellulare ** main_table) {
+    return MODIFIED_FILE_DATA_FLAG;
+    /*FILE * csv_table = open_cell_file("r");
     size_t file_table_size = get_file_rows(csv_table);
-    size_t main_table_size = main_table_len(main_table);
+    size_t main_table_size = main_table_len(main_table);*/
     /*
      * if len is not enough do 1 on 1 comparison
      * cellulare * file_table = calloc(file_table_size, sizeof(cellulare));
      * read_to_list(file_table, csv_table);
      */
+    /*
     if (main_table_size != file_table_size)
         return 1;
-    return 0;
+    return 0;*/
 }
 
-unsigned int write_cell_to_file(cellulare * r_d, FILE * w_d) {
+uint32 write_cell_to_file(cellulare * r_d, FILE * w_d) {
     char w_d_f[700] = {0};
     sprintf(w_d_f, "%d,%s,%d,%s,%d,%f,%s\n", r_d->id, r_d->name, r_d->ram, r_d->cpu, r_d->display_ppi, r_d->display_size, r_d->display_resolution); // TODO add rest of parameters
     return write_str_to_file(w_d_f, w_d);
 }
 
-unsigned int write_table_to_file(cellulare ** main_table) {
+uint32 write_table_to_file(cellulare ** main_table) {
     /*
      * Returns the bytes written to the file
      */

@@ -1,6 +1,7 @@
 #include "../TOOLS_API/analytics.h"
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 /*
  * This section adresses data output in various formats.
@@ -87,9 +88,8 @@ void concat_cellulare_string(cellulare * data, char * w_d) {
 
 void generate_string (cellulare ** main_table, char * w_d) {
     strcpy(w_d, "| ID | NAME               | RAM | PROCESSOR           | DISPALY_PPI | DISPLAY_SIZE | DISPLAY_RESOLUTION |\n");
-    //TODO consider adding all struct members
     for (; *main_table; main_table++)
-        concat_cellulare_string(*(main_table), w_d);
+        concat_cellulare_string(*main_table, w_d);
 }
 
 int export_to_HTML(cellulare ** main_table) {
@@ -159,5 +159,17 @@ void print_hidden(cellulare * cell) {
     printf("Manufacturer id: %d\n", cell->id_manufacturer);
     printf("Operating System's id: %d\n", cell->id_os);
     printf("Weight: %d\n", cell->weight);
-    printf("Notes:\n%s", cell->notes);
+    printf("Notes:\n%s\n", cell->notes);
+}
+
+void tolowerstring(const char * mixed_str, char * res_string, const size_t MAX) {
+    const char * p = mixed_str;
+    unsigned int i = 0;
+    while (*p && i <= MAX) {
+        if (isalpha(*p) && isupper(*p))
+            *res_string = *p + ' ';
+        else
+            *res_string = *p;
+        p++; res_string++; i++;
+    }
 }
