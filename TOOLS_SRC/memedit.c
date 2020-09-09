@@ -1,7 +1,9 @@
 #include <stdlib.h>
 #include "../TOOLS_API/memedit.h"
 
-int add_cellulare(cellulare ** main_table, cellulare * r_d) {
+extern cellulare ** main_table;
+
+int add_cellulare(cellulare * r_d) {
     /*
      * This function takes a cellulare * and adds it to the main_table
      * The r_d cellulare's id is automatically calculated based on preexisting data
@@ -9,7 +11,7 @@ int add_cellulare(cellulare ** main_table, cellulare * r_d) {
     // 10 + NULL -- 11 + NULL
     if (!r_d)
         return 2;
-    unsigned int new_table_len = main_table_len(main_table) + 2; // NULL termination + new element
+    unsigned int new_table_len = main_table_len() + 2; // NULL termination + new element
     unsigned int new_id = new_table_len - 1;
 
 //    puts("**********DEBUG**********");
@@ -50,8 +52,8 @@ int add_cellulare(cellulare ** main_table, cellulare * r_d) {
     return 0;
 }
 
-int delete_cellulare(cellulare ** main_table, int delete_index) {
-    size_t m_t_len = main_table_len(main_table) + 1; // +1 because of the NULL termination
+int delete_cellulare(int delete_index) {
+    size_t m_t_len = main_table_len() + 1; // +1 because of the NULL termination
     if (m_t_len < 2)
         return 1;
     if (delete_index < 0 || delete_index > m_t_len-2) // the last index should be the last id -1 + -1 // NULL termination)

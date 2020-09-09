@@ -1,6 +1,8 @@
 #include "../TOOLS_API/sorting.h"
 #include <ctype.h>
 
+extern cellulare ** main_table;
+
 const struct field fields[] = {
         {"id", &id_compare, "ID of the product"},
         {"weight", &weight_compare, "Weight of the product"},
@@ -116,14 +118,14 @@ comparator_func get_comp_func(char * member) {
     return NULL;
 }
 
-int cell_quick_sort(cellulare **main_table, size_t element_size, size_t nitems, char *member) {
+int cell_quick_sort(size_t element_size, size_t nitems, char *member) {
     // TODO add reversed param
 
     /// returns 0 if failed
     comparator_func c_f = get_comp_func(member);
     if (c_f) {
         qsort(main_table, nitems, element_size, c_f);
-        size_t table_len = main_table_len(main_table);
+        size_t table_len = main_table_len();
         for (int i=0; i<table_len; i++) {
             main_table[i]->id = i+1;
         }

@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include <malloc.h>
 
+extern cellulare ** main_table;
+
 void push(struct parameter * head_node, char * new_data, uint32 data_size) {
     struct parameter * new_parameter = calloc(1, sizeof(struct parameter));
     new_parameter->data = calloc(data_size, sizeof(char));
@@ -82,16 +84,16 @@ uint32 iterate_cellulare(cellulare * data, const char * paramter) {
     return occourences;
 }
 
-void iterate_main_table(cellulare ** main_table, const char * parameter, uint32 * search_table) {
-    size_t main_table_l = main_table_len(main_table);
+void iterate_main_table(const char *parameter, uint32 *search_table) {
+    size_t main_table_l = main_table_len();
     for (size_t i = 0; i < main_table_l; i++) {
         search_table[i] += iterate_cellulare(main_table[i], parameter);
     }
 }
 
-void iterate_parameters(cellulare ** main_table, struct parameter * head_parameter, uint32 * search_table) {
+void iterate_parameters(struct parameter *head_parameter, uint32 *search_table) {
     for( struct parameter * current = head_parameter; current; current = current->next )
-        iterate_main_table(main_table, current->data, search_table);
+        iterate_main_table(current->data, search_table);
 }
 
 int in_array(const int *array, uint32 array_len, uint32 value) {
@@ -141,12 +143,12 @@ int * find_best(uint32 * search_table, uint32 search_table_len, int * search_res
     return search_results;
 }
 
-void out_search_result(cellulare ** main_table, const int * search_results) {
+void out_search_result(const int *search_results) {
     puts("The following results have been found:");
     for (size_t i = 0; i < MAX_PRINTED_RESULTS; i++) {
         char buff[CELLULARE_STRING_LINE_SIZE] = {0};
         if (search_results[i] >= 0) {
-            sprintf(buff, "%lu) ", i+1);
+            sprintf(buff, "%u) ", i+1);
             concat_cellulare_string(main_table[search_results[i]], buff);
             printf("%s", buff);
         }
@@ -166,8 +168,8 @@ void free_ll (struct parameter * head) {
     }
 }
 
-void search_menu(cellulare ** main_table, char * raw_parameters) {
-    size_t search_table_len = main_table_len(main_table);
+void search_menu(char *raw_parameters) {
+    size_t search_table_len = main_table_len();
     if (!strcmp(raw_parameters, "")) {
         puts("You have not given any parameters, the function will now exit!");
         return;
@@ -186,7 +188,7 @@ void search_menu(cellulare ** main_table, char * raw_parameters) {
     for (uint32 i = 0; i < MAX_PRINTED_RESULTS; i++) // consider refactoring to function
         search_results[i] = -1;
 
-    iterate_parameters(main_table, head_parameter, search_table);
+    iterate_parameters(head_parameter, search_table);
 //    puts("search table:");
 //    for (int i = 0; i < search_table_len; i++) {
 //        printf("id: %d -- %d\n",i+1, search_table[i]);
@@ -197,7 +199,7 @@ void search_menu(cellulare ** main_table, char * raw_parameters) {
 //    for (int i = 0; i < MAX_PRINTED_RESULTS; i++)
 //        printf("%d) %d\n",i+1, search_results[i]);
 
-    out_search_result(main_table, search_results);
+    out_search_result(search_results);
 
     free(search_results);
     free(search_table);

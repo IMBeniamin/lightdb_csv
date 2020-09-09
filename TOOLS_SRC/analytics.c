@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <ctype.h>
 
+extern cellulare ** main_table;
+
 /*
  * This section adresses data output in various formats.
  * This section is not part of the gui which manipulates data in real time and displays it, but it allows conversions
@@ -39,8 +41,8 @@ int prep_ante(FILE * analyt_html) {
     else return 1;
 }
 
-void prep_cont(cellulare ** main_table, FILE * analyt_html) {
-    for (; *main_table; main_table++) {
+void prep_cont(FILE *analyt_html) {
+    for (int i = 0; main_table[i]; main_table++) {
         char _tbw[500];
         sprintf(_tbw, "        <tr>\n"
                       "            <th>%d</th>\n"
@@ -52,14 +54,14 @@ void prep_cont(cellulare ** main_table, FILE * analyt_html) {
                       "            <th>%s</th>\n"
                       "            <th><img style=\"width: 80px; height: 80px;\" src=\"res\\%s.jpg\"></th>\n"
                       "        </tr>\n",
-                                (*main_table)->id,
-                                (*main_table)->name,
-                                (*main_table)->ram,
-                                (*main_table)->cpu,
-                                (*main_table)->display_ppi,
-                                (*main_table)->display_size,
-                                (*main_table)->display_resolution,
-                                (*main_table)->name);
+                                main_table[i]->id,
+                                main_table[i]->name,
+                                main_table[i]->ram,
+                                main_table[i]->cpu,
+                                main_table[i]->display_ppi,
+                                main_table[i]->display_size,
+                                main_table[i]->display_resolution,
+                                main_table[i]->name);
         write_str_to_file(_tbw, analyt_html);
     }
 }
@@ -91,28 +93,28 @@ void concat_cellulare_string(cellulare * data, char * w_d) {
     strcat(w_d, _generated_line);
 }
 
-void generate_string (cellulare ** main_table, char * w_d) {
+void generate_string(char *w_d) {
     strcpy(w_d, "| ID | NAME               | RAM | PROCESSOR           | DISPALY_PPI | DISPLAY_SIZE | DISPLAY_RESOLUTION |\n");
     for (int i = 0; main_table[i]; i++)
         concat_cellulare_string(main_table[i], w_d);
 }
 
-int export_to_HTML(cellulare ** main_table) {
+int export_to_HTML() {
     FILE * analyt_html = open_file("HTMl_output.html", "w");
     if (prep_ante(analyt_html)) return 1;
-    prep_cont(main_table, analyt_html);
+    prep_cont(analyt_html);
     if (prep_post(analyt_html)) return 1;
     fclose(analyt_html);
     return 0; // ret 0 if everything went well
 }
 
-int export_to_TXT(cellulare ** main_table) {
+int export_to_TXT() {
     FILE * analyt_txt = open_file("TXT_output.txt", "w");
     if (!analyt_txt) return 1;
-    char * formatted_data = calloc(main_table_len(main_table)*CELLULARE_STRING_LINE_SIZE+1, sizeof(char));
+    char * formatted_data = calloc(main_table_len() * CELLULARE_STRING_LINE_SIZE + 1, sizeof(char));
     if (!formatted_data) return 1;
 
-    generate_string(main_table, formatted_data);
+    generate_string(formatted_data);
     write_str_to_file(formatted_data, analyt_txt);
 
     free(formatted_data);

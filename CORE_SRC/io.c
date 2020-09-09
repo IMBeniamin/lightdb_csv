@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+extern cellulare ** main_table;
+
 /*
  * INPUT SECTION
  * This part deals with all data reading and importing into memory.
@@ -79,14 +81,14 @@ cellulare * load_data_list() {
     size_t rows = get_file_rows(cell_file);
     fclose(cell_file);
 
-    cellulare * main_table = calloc(rows, sizeof(cellulare));
-    if (!main_table)
+    cellulare * _main_table = calloc(rows, sizeof(cellulare));
+    if (!_main_table)
         return NULL;
     cell_file = open_cell_file("r");
-    read_to_list(main_table, cell_file);
+    read_to_list(_main_table, cell_file);
     fclose(cell_file);
 
-    return main_table;
+    return _main_table;
 
 }
 
@@ -96,18 +98,18 @@ cellulare ** load_data_plist() {
     FILE * cell_file = open_cell_file("r");
     size_t rows = get_file_rows(cell_file);
     fclose(cell_file);
-    cellulare ** main_table = calloc(rows + 1, sizeof(cellulare*));
-    if (!main_table)
+    cellulare ** _main_table = calloc(rows + 1, sizeof(cellulare*));
+    if (!_main_table)
         return NULL;
     for (int i = 0; i < rows; i++) {
-        main_table[i] = calloc(1, sizeof(cellulare)); // allocate each struct
-        if (!main_table[i])
+        _main_table[i] = calloc(1, sizeof(cellulare)); // allocate each struct
+        if (!_main_table[i])
             return NULL; // TODO fix memory leak
     }
-    main_table[rows] = NULL;
+    _main_table[rows] = NULL;
     cell_file = open_cell_file("r");
-    read_to_plist(main_table, cell_file);
-    return main_table;
+    read_to_plist(_main_table, cell_file);
+    return _main_table;
 }
 
 cellulare ** pointer_list_flist(cellulare * list, size_t lsize) {
@@ -120,29 +122,31 @@ cellulare ** pointer_list_flist(cellulare * list, size_t lsize) {
     return pointer_list;
 }
 
-void free_main_table(cellulare * main_table) {
+void free_main_table() {
     free(main_table);
 }
 
-void free_main_table_p(cellulare **main_table) {
+void free_main_table_p() {
     // !! ONLY call this IF EACH struct was malloc'ed INDIVIDUALLY
     //size_t rows = get_file_rows(open_cell_file("r")); legacy data counting function
-    for (;*main_table; main_table++) {
-        free(*main_table);
+    cellulare ** p = main_table;
+    for (;*p; p++) {
+        free(*p);
     }
-    free(main_table);
+    free(p);
 }
 
-size_t main_table_len(cellulare ** main_table) {
+size_t main_table_len() {
     int i = 0;
-    while(*main_table) {
+    cellulare ** p = main_table;
+    while(*p) {
         i++;
-        main_table++;
+        p++;
     }
     return i;
 }
 
-uint32 check_modified(cellulare ** main_table) {
+uint32 check_modified() {
     return MODIFIED_FILE_DATA_FLAG;
     /*FILE * csv_table = open_cell_file("r");
     size_t file_table_size = get_file_rows(csv_table);
@@ -164,13 +168,13 @@ uint32 write_cell_to_file(cellulare * r_d, FILE * w_d) {
     return write_str_to_file(w_d_f, w_d);
 }
 
-uint32 write_table_to_file(cellulare ** main_table) {
+uint32 write_table_to_file() {
     /*
      * Returns the bytes written to the file
      */
     size_t elem_written;
     size_t tot_written = 0;
-    if (check_modified(main_table)) {
+    if (check_modified()) {
         FILE * w_d = open_cell_file("w");
         while (*main_table) {
             elem_written = write_cell_to_file(*main_table, w_d);
@@ -187,7 +191,7 @@ uint32 write_table_to_file(cellulare ** main_table) {
     return tot_written;
 }
 
-void safe_quit(cellulare ** main_table) {
-    write_table_to_file(main_table);
+void safe_quit() {
+    write_table_to_file();
     exit(0);
 }

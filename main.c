@@ -1,22 +1,26 @@
 #include "core_api.h"
 uint32 MODIFIED_FILE_DATA_FLAG = 0;
+cellulare ** main_table;
 
 int main(int argc, char *argv[]) {
-    setbuf(stdout, 0);
+    setbuf(stdout, 0); // sets stdout's buffer to NULL allowing it to work during debug
 //    char * test = get_user_str("Input stuff --> ", "Wrong stuff\n", 10);
 //    printf("\n\n%s\n\n", test);
 //    free(test);
-    cellulare ** main_table = load_data_plist();  // Load file data in memory
-
+    main_table = load_data_plist();  // Load file data in memory;
+    if (!main_table) {
+        puts("An error occoured in load the file in memory!");
+        return 1;
+    }
     if(argc == 2) // if 2 arguments are passed (name + command)
-        cmd_handler(main_table, argv[1]); // execute the command
+        cmd_handler(argv[1]); // execute the command
     else
     {
         //test_commands();
-        cmd_handler(main_table, "help");
-        ui_loader(main_table);
+        cmd_handler("help");
+        ui_loader();
     }
-    free_main_table_p(main_table);  // Free loaded data WORKING*/
+    free_main_table_p();  // Free loaded data*/
     return 0;
 }
 

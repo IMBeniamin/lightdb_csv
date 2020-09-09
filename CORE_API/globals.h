@@ -58,6 +58,7 @@ typedef struct String {
  * 0 and 1 should be used for all true/false flags
  * Flags with error tables should have corresponding documentation
  */
+
 extern uint32 MODIFIED_FILE_DATA_FLAG;
 
 #endif //CSV_DATABASE_GLOBALS_H

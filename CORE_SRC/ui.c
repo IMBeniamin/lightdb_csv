@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <malloc.h>
-
+extern cellulare ** main_table;
 typedef void(*functionPointerType)(cellulare **);
 
 struct commandStruct {
@@ -52,11 +52,10 @@ const struct commandStruct commands[] = {
  * Manages and updates screen and handles user i/o
  */
 
-_Noreturn void ui_loader(cellulare ** main_table) {
+_Noreturn void ui_loader() {
     // Boot up the CLI
-    setbuf(stdout, 0); // sets stdout's buffer to NULL allowing it to work during debug
     while (1)
-        get_user_command(main_table, ">");
+        get_user_command(">");
 }
 
 /*
@@ -66,12 +65,12 @@ _Noreturn void ui_loader(cellulare ** main_table) {
  * All functions in this category should start with "cmd_"
  */
 
-void cmd_display_table(cellulare ** main_table) {
-    uint32 str_data_len = (main_table_len(main_table) * CELLULARE_STRING_LINE_SIZE + 1) * sizeof(char);
+void cmd_display_table() {
+    uint32 str_data_len = (main_table_len() * CELLULARE_STRING_LINE_SIZE + 1) * sizeof(char);
     char * str_data = malloc(str_data_len);
     str_data[0] = '\0';
 
-    generate_string(main_table, str_data);
+    generate_string(str_data);
     printf("%s", str_data);
     free(str_data);
 }
@@ -82,25 +81,25 @@ void cmd_list_fields() {
         printf("%-21s --> %s\n", fields[i].name, fields[i].description);
 }
 
-void cmd_html(cellulare ** main_table) {
-    if(export_to_HTML(main_table))
+void cmd_html() {
+    if(export_to_HTML())
         puts("The html file could not be generated!");
     system("HTMl_output.html");
 }
 
-void cmd_txt(cellulare ** main_table) {
-    if (export_to_TXT(main_table))
+void cmd_txt() {
+    if (export_to_TXT())
         puts("The txt file could not be generated!");
     system("TXT_output.txt");
 }
 
-void cmd_sort(cellulare ** main_table) {
+void cmd_sort() {
     if (get_user_y_n("Would you like to view all fields available? [y/n] --> ", "That value isn't accepted!"))
         cmd_list_fields(); // todo test
-    size_t m_t_len = main_table_len(main_table);
+    size_t m_t_len = main_table_len();
     fflush(stdin);
     char * field = get_user_str("\nSort by [field] --> ", "That value is not accepted!", 20);
-    if (!cell_quick_sort(main_table, sizeof(cellulare *), m_t_len, field)) {
+    if (!cell_quick_sort(sizeof(cellulare *), m_t_len, field)) {
         printf("The field you provided does not exist! No changes were made.\n");
         return;
     }
@@ -109,16 +108,16 @@ void cmd_sort(cellulare ** main_table) {
     free(field);
 }
 
-void cmd_search(cellulare ** main_table) {
+void cmd_search() {
     char * raw_parameters = get_user_str("Write search parameters separated by space [partial parameters are accepted] [parameters can be of any type] [search is NOT case sensitive]:\n",
                  "The data you inserted is not valid!", MAX_PARAM_DATA_SIZE);
-    search_menu(main_table, raw_parameters);
+    search_menu(raw_parameters);
     free(raw_parameters);
 }
 
-void cmd_view(cellulare ** main_table) {
+void cmd_view() {
     uint32 id;
-    uint32 m_t_len = main_table_len(main_table);
+    uint32 m_t_len = main_table_len();
     id = get_user_int("Id of the cellulare --> ", "Invalid id!\n", (int)m_t_len+1, 0);
     if (!id) {
         puts("Exiting..");
@@ -131,12 +130,12 @@ void cmd_view(cellulare ** main_table) {
         print_hidden(main_table[id-1]);
 }
 
-void cmd_add(cellulare ** main_table) {
+void cmd_add() {
     //**********DEBUG**********
     char _debug_str[CELLULARE_STRING_LINE_SIZE] = {0};
     //**********DEBUG**********
 
-    cellulare * r_d = get_user_cellulare(main_table);
+    cellulare * r_d = get_user_cellulare();
 
     //**********DEBUG**********
     concat_cellulare_string(r_d, _debug_str);
@@ -145,20 +144,20 @@ void cmd_add(cellulare ** main_table) {
     puts("**********DEBUG**********");
     //**********DEBUG**********
 
-    if(add_cellulare(main_table, r_d))
+    if(add_cellulare(r_d))
         puts("Phone hasn't been added, nothing has changed.");
     else
         puts("Successfuly added cellulare.");
     free(r_d);
 }
 
-void cmd_del(cellulare ** main_table) {
-    int last_id = main_table_len(main_table);
+void cmd_del() {
+    int last_id = main_table_len();
     char * help_line = "Id non valido!";
     // -1 because of the id to index conversion
     int delete_index = get_user_int("Id of the element to be deleted --> ", help_line, (int)last_id+1, 0)-1;
 
-    if(delete_cellulare(main_table, delete_index))
+    if(delete_cellulare(delete_index))
         puts("The phone hasn't been deleted, nothing has changed!");
     else
         puts("Successfuly deleted cellulare.");
@@ -176,8 +175,8 @@ void cmd_unsafe_quit() {
     exit(0);
 }
 
-void cmd_safe_quit(cellulare ** main_table) {
-    safe_quit(main_table);
+void cmd_safe_quit() {
+    safe_quit();
 }
 
 /*
@@ -304,7 +303,7 @@ double get_user_double(const char *message, const char *help_line, double ROOF_V
     }
 }
 
-cellulare * get_user_cellulare(cellulare ** main_table) {
+cellulare *get_user_cellulare() {
     /*
      * This function asks the user all the data necessary to build a cellulare
      * The memory is allocated on the heap so REMEMBER TO FREE IT
@@ -352,17 +351,17 @@ cellulare * get_user_cellulare(cellulare ** main_table) {
         puts("The phone was empty, ignoring");
         return NULL;
     }
-    ret_cell->id = main_table_len(main_table);
+    ret_cell->id = main_table_len();
     return ret_cell;
 }
 
-void get_user_command(cellulare ** main_table, const char * message) {
+void get_user_command(const char *message) {
     char * cmd = get_user_str(message, "The value you have provided is not a string!", 0);
-    cmd_handler(main_table, cmd);
+    cmd_handler(cmd);
     free(cmd);
 }
 
-void cmd_handler(cellulare ** main_table, const char * cmd) {
+void cmd_handler(const char *cmd) {
     for (size_t i = 0; commands[i].execute; i++) {
         if(!strcmp(commands[i].name, cmd)) {
             (*commands[i].execute)(main_table);
@@ -372,7 +371,7 @@ void cmd_handler(cellulare ** main_table, const char * cmd) {
     printf("WARNING: No matching command for %s\n", cmd);
 }
 
-void test_commands(cellulare ** main_table) {
+void test_commands() {
     for (size_t i = 0; commands[i].execute; i++) {
         printf("%s : ", commands[i].name);
         (*commands[i].execute)(main_table);
