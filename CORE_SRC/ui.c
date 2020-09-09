@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <malloc.h>
 
 typedef void(*functionPointerType)(cellulare **);
 
@@ -66,7 +67,10 @@ _Noreturn void ui_loader(cellulare ** main_table) {
  */
 
 void cmd_display_table(cellulare ** main_table) {
-    char * str_data = calloc(main_table_len(main_table) * CELLULARE_STRING_LINE_SIZE + 1, sizeof(char));
+    uint32 str_data_len = (main_table_len(main_table) * CELLULARE_STRING_LINE_SIZE + 1) * sizeof(char);
+    char * str_data = malloc(str_data_len);
+    str_data[0] = '\0';
+
     generate_string(main_table, str_data);
     printf("%s", str_data);
     free(str_data);
@@ -116,6 +120,10 @@ void cmd_view(cellulare ** main_table) {
     uint32 id;
     uint32 m_t_len = main_table_len(main_table);
     id = get_user_int("Id of the cellulare --> ", "Invalid id!\n", (int)m_t_len+1, 0);
+    if (!id) {
+        puts("Exiting..");
+        return;
+    }
     char data[CELLULARE_STRING_LINE_SIZE]; data[0] = '\0';
     concat_cellulare_string(main_table[id-1], data);
     printf("%s", data);
@@ -124,27 +132,41 @@ void cmd_view(cellulare ** main_table) {
 }
 
 void cmd_add(cellulare ** main_table) {
+    //**********DEBUG**********
+    char _debug_str[CELLULARE_STRING_LINE_SIZE] = {0};
+    //**********DEBUG**********
+
     cellulare * r_d = get_user_cellulare(main_table);
+
+    //**********DEBUG**********
+    concat_cellulare_string(r_d, _debug_str);
+    puts("**********DEBUG**********");
+    puts(_debug_str);
+    puts("**********DEBUG**********");
+    //**********DEBUG**********
+
     if(add_cellulare(main_table, r_d))
-        puts("Could not add cellulare! Nothing was changed.");
+        puts("Phone hasn't been added, nothing has changed.");
     else
         puts("Successfuly added cellulare.");
     free(r_d);
 }
 
 void cmd_del(cellulare ** main_table) {
-    unsigned int delete_index;
-    unsigned int last_index = main_table_len(main_table);
+    int last_id = main_table_len(main_table);
     char * help_line = "Id non valido!";
-    delete_index = get_user_int("Id of the element to be deleted --> ", help_line, (int)last_index+1, -1);
+    // -1 because of the id to index conversion
+    int delete_index = get_user_int("Id of the element to be deleted --> ", help_line, (int)last_id+1, 0)-1;
+
     if(delete_cellulare(main_table, delete_index))
-        puts("Could not delete cellulare! Nothing was changed.");
+        puts("The phone hasn't been deleted, nothing has changed!");
     else
         puts("Successfuly deleted cellulare.");
 }
 
 void cmd_help() {
     printf("-----------------\n| Help Section! |\n-----------------\nThe following commands are available:\n----------------------------------\n");
+    puts("While the application is asking for input, to cancel an operation write [!] and press [enter]");
     for (size_t i = 0; commands[i].execute; i++)
         if (strcmp(commands[i].help, "ignore") != 0)
             printf("%s -- %s\n", commands[i].name, commands[i].help);
@@ -254,12 +276,11 @@ int get_user_int(const char *message, const char *help_line, int ROOF_VAL, int F
 double get_user_double(const char *message, const char *help_line, double ROOF_VAL, double FLOOR_VAL) {
     #define CHARED_INT_MAX_SIZE 311 // char occupati da: (1,8 * 10^308)
     char buffer[CHARED_INT_MAX_SIZE] = {0};
-
     while (1) {
         fputs(message, stdout);
         fgets(buffer, CHARED_INT_MAX_SIZE, stdin);
         fflush(stdin);
-        if (!strcmp(buffer, "\n")) // checks if the buffer is not empty
+        if (!strcmp(buffer, "\n") || !strcmp(buffer, "!\n")) // checks if the buffer is not empty
             return 0;
         strncpy(buffer, strtok(buffer, "\n"), CHARED_INT_MAX_SIZE - 1);
 
@@ -293,7 +314,6 @@ cellulare * get_user_cellulare(cellulare ** main_table) {
     if (!ret_cell)
         return NULL;
 
-    ret_cell->id = main_table_len(main_table);
     printf("Input the requested data and press 'enter' to continue.\nIf you want to leave a field blank "
            "press enter without entering any data.\n");
 
@@ -324,6 +344,15 @@ cellulare * get_user_cellulare(cellulare ** main_table) {
     buffer = get_user_str("Notes [max 500 char]:\n",help_line, MAX_NOTES);
     strcpy(ret_cell->notes, buffer);
     free(buffer);
+
+    // test if struct is empty
+    cellulare * test_cell = alloca(sizeof(cellulare));
+    memset(test_cell, 0, sizeof(cellulare));
+    if (!memcmp(ret_cell, test_cell, sizeof(cellulare))) {
+        puts("The phone was empty, ignoring");
+        return NULL;
+    }
+    ret_cell->id = main_table_len(main_table);
     return ret_cell;
 }
 

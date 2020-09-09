@@ -64,7 +64,7 @@ void read_to_list(cellulare * destination, FILE * r_d) {
     }
 }
 
-void read_to_llist(cellulare ** destination, FILE * r_d) {
+void read_to_plist(cellulare ** destination, FILE * r_d) {
     for (; *destination; destination++) {
         read_cellulare(r_d, *destination);
     }
@@ -80,7 +80,8 @@ cellulare * load_data_list() {
     fclose(cell_file);
 
     cellulare * main_table = calloc(rows, sizeof(cellulare));
-
+    if (!main_table)
+        return NULL;
     cell_file = open_cell_file("r");
     read_to_list(main_table, cell_file);
     fclose(cell_file);
@@ -90,17 +91,22 @@ cellulare * load_data_list() {
 }
 
 cellulare ** load_data_plist() {
+    // TODO add controls for input data ( validate csv file )
     // Generates a pointer list containing data read from the csv flie
     FILE * cell_file = open_cell_file("r");
     size_t rows = get_file_rows(cell_file);
     fclose(cell_file);
     cellulare ** main_table = calloc(rows + 1, sizeof(cellulare*));
+    if (!main_table)
+        return NULL;
     for (int i = 0; i < rows; i++) {
         main_table[i] = calloc(1, sizeof(cellulare)); // allocate each struct
+        if (!main_table[i])
+            return NULL; // TODO fix memory leak
     }
     main_table[rows] = NULL;
     cell_file = open_cell_file("r");
-    read_to_llist(main_table, cell_file);
+    read_to_plist(main_table, cell_file);
     return main_table;
 }
 

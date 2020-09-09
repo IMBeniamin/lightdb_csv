@@ -83,13 +83,18 @@ void concat_cellulare_string(cellulare * data, char * w_d) {
             data->display_ppi,
             data->display_size,
             data->display_resolution);
+    // **********DEBUG**********
+//    puts("**********DEBUG**********");
+//    puts(_generated_line);
+//    puts("**********DEBUG**********");
+    // **********DEBUG**********
     strcat(w_d, _generated_line);
 }
 
 void generate_string (cellulare ** main_table, char * w_d) {
     strcpy(w_d, "| ID | NAME               | RAM | PROCESSOR           | DISPALY_PPI | DISPLAY_SIZE | DISPLAY_RESOLUTION |\n");
-    for (; *main_table; main_table++)
-        concat_cellulare_string(*main_table, w_d);
+    for (int i = 0; main_table[i]; i++)
+        concat_cellulare_string(main_table[i], w_d);
 }
 
 int export_to_HTML(cellulare ** main_table) {
